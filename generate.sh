@@ -1,3 +1,8 @@
+#!/bin/sh
+
+# Exits if an error occurs.
+set -e
+
 echo "Copying the meow.txt template to ${1}"
 
 cp /opt/meow/meow-template.txt $1/meow.txt

@@ -8,26 +8,40 @@ linebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
 kill_started_processes() {
   if [ "$TRAP_EXIT" = true ]; then
-    while read saved_pid_groups; do
-      KILL_LINE_NUMBER=0
+    while read saved_tab_group; do
+      SAVED_TAB_GROUP_LINE_INDEX=0
 
-      while read -r pid; do
-        # If the process is still alive then kill it.
-        if ps -p $pid > /dev/null; then
-          echo "$KILL_LINE_NUMBER. Killing  Process: $pid";
-          kill $pid;
-        else
-          echo "$KILL_LINE_NUMBER. Process Already Dead: $pid";
+      while read saved_tab_group_line; do
+        if [ "$SAVED_TAB_GROUP_LINE_INDEX" = 0 ]; then
+          PREVIOUS_SAVED_TAB_GROUP_LINE=$saved_tab_group_line
+        elif [ "$SAVED_TAB_GROUP_LINE_INDEX" = 1 ]; then
+          if [ "$saved_tab_group_line" = "expire" ]; then
+            KILL_LINE_NUMBER=0
+
+            while read -r pid; do
+              # If the process is still alive then kill it.
+              if ps -p $pid > /dev/null; then
+                echo "$KILL_LINE_NUMBER. Killing  Process: $pid";
+                kill $pid;
+              else
+                echo "$KILL_LINE_NUMBER. Process Already Dead: $pid";
+              fi
+
+              KILL_LINE_NUMBER=$((KILL_LINE_NUMBER + 1))
+            done < $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
+
+            # Erase the meow-pids-N.txt file.
+            truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
+            echo "Process cleanup done for meow-pids-${PREVIOUS_SAVED_TAB_GROUP_LINE}.txt"
+          fi
         fi
 
-        KILL_LINE_NUMBER=$((KILL_LINE_NUMBER+1))
-      done < $CONFIG_RELATIVE_DIRECTORY/meow-pids-$saved_pid_groups.txt
-
-      # Erase the meow-pids-N.txt file.
-      truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$saved_pid_groups.txt
-      echo "Process cleanup done for meow-pids-${saved_pid_groups}.txt"
+        SAVED_TAB_GROUP_LINE_INDEX=$((SAVED_TAB_GROUP_LINE_INDEX + 1))
+      done <<EOT
+        `echo "$saved_tab_group" | sed -n 1'p' | tr '|' '\n'`
+EOT
     done <<EOT
-      $(echo "$PIDS_TO_KILL" | sed -n 1'p' | tr '|' '\n')
+      `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
 EOT
   fi
 }
@@ -95,7 +109,7 @@ gnome() {
 
     GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
   done <<EOT
-    $(echo "$@" | sed -n 1'p' | tr '|' '\n')
+    `echo "$@" | sed -n 1'p' | tr '|' '\n'`
 EOT
 
   GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
@@ -109,11 +123,9 @@ EOT
   fi
 }
 
-# IF WE DO TAKE IN COMMAND LINE ARGS THEN WE CAN MATCH THEM TO THE GROUP NUMBER
 read_meow_txt_file() {
   # maybe clear the meow.txt file of spaces on the left and right
   # cat meow.txt | awk '{$1=$1};1'
-  # echo $@
   START_OF_CONFIG=false
   START_OF_COMMANDS=false
   FIRST_COMMAND=false
@@ -161,7 +173,6 @@ read_meow_txt_file() {
       elif [ "$FIRST_COMMAND" = true ]; then
         # This condition signifies we have reached the first command.
         TAB_GROUPS="${GROUP_NUMBER}|expire|${line}"
-        PIDS_TO_KILL="${GROUP_NUMBER}"
         FIRST_COMMAND=false
       elif linebeginswith "--new-tab" $line; then
         GROUP_NUMBER=$((GROUP_NUMBER + 1))
@@ -170,7 +181,6 @@ read_meow_txt_file() {
           TAB_GROUPS="${TAB_GROUPS};${GROUP_NUMBER}|endure"
         else
           TAB_GROUPS="${TAB_GROUPS};${GROUP_NUMBER}|expire"
-          PIDS_TO_KILL="${PIDS_TO_KILL}|${GROUP_NUMBER}"
         fi
       else
         TAB_GROUPS="${TAB_GROUPS}|${line}"
@@ -180,48 +190,148 @@ read_meow_txt_file() {
     fi
 
   done < meow.txt
-  echo $TAB_GROUPS
 }
 
-eval_commands() {
-  GROUP_INDEX=0
+handle_command_line_args() {
+  NEW_TAB_GROUPS=""
+  SORTED_ARGS=`for i in $@; do echo $i ; done | sort -nu`
 
-  while read group; do
-    if [ "$GROUP_INDEX" = 0 ]; then
-      LINE_COMMAND_INDEX=0
+  for command_line_arg in `eval echo $SORTED_ARGS`; do
+    while read prepared_group; do
+      PREPARED_GROUP_LINE_INDEX=0
 
-      while read line_command; do
-        # All we need to do here is evaluate commands that occur after the "expire" argument for group 0.
-        if [ "$LINE_COMMAND_INDEX" -gt 1 ]; then
-          eval "${line_command} &"
+      while read prepared_group_line; do
+        # Index 0 represents the position of the original group number.
+        if [ "$PREPARED_GROUP_LINE_INDEX" = 0 ]; then
+          if [ "$prepared_group_line" = "$command_line_arg" ]; then
+            if [ "$NEW_TAB_GROUPS" = "" ]; then
+              NEW_TAB_GROUPS="${prepared_group}"
+            else
+              NEW_TAB_GROUPS="${NEW_TAB_GROUPS};${prepared_group}"
+            fi
+          fi
         fi
 
-        LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
+        PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
       done <<EOT
-      $(echo "$group" | sed -n 1'p' | tr '|' '\n')
+        `echo "$prepared_group" | sed -n 1'p' | tr '|' '\n'`
 EOT
+    done <<EOT
+      `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+EOT
+  done
+
+  TAB_GROUPS=$NEW_TAB_GROUPS
+}
+
+# eval_commands() {
+#   if [ ! -z $1 ]; then
+#     GROUP_INDEX=$1
+#     BOSS_GROUP_STARTED=false
+#   else
+#     GROUP_INDEX=0
+#     BOSS_GROUP_STARTED=true
+#   fi
+
+#   while read group; do
+#     if [ "$GROUP_INDEX" = 0 ]; then
+#       LINE_COMMAND_INDEX=0
+
+#       while read line_command; do
+#         if [ "$LINE_COMMAND_INDEX" = 0 ] && [ "$GROUP_INDEX" = 0 ] && [ "$line_command" != 0 ]; then
+#           echo "I AM HERE NOW"
+#           # If this condition is not met it means that meow was passed command line args without 0 aka the Boss group.
+#           BOSS_GROUP_STARTED=false
+#           # break
+#         fi
+#         # All we need to do here is evaluate commands that occur after the "expire" argument for group 0.
+#         if [ "$BOSS_GROUP_STARTED" = true ]; then
+#           if [ "$LINE_COMMAND_INDEX" -gt 1 ]; then
+#             eval "${line_command} &"
+#           fi
+#         fi
+
+#         LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
+#       done <<EOT
+#       `echo "$group" | sed -n 1'p' | tr '|' '\n'`
+# EOT
+#       # This should always make meow-pids-0.txt
+#       if [ "$BOSS_GROUP_STARTED" = true ]; then
+#         jobs -p >>$CONFIG_RELATIVE_DIRECTORY/meow-pids-$GROUP_INDEX.txt
+#       fi
+#     else
+#       echo "LSKDJFLSJFLSKJLSKDJFLSKDJF"
+#       apple_terminal $group || iterm $group || gnome $group &
+#     fi
+
+#   GROUP_INDEX=$((GROUP_INDEX + 1))
+# # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
+# # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
+#   done <<EOT
+#   `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+# EOT
+
+#   # Tell the first command to come to the foreground.
+#   if [ "$BOSS_GROUP_STARTED" = true ]; then
+#     fg %1
+#   else
+#     eval_commands $GROUP_INDEX
+#   fi
+# }
+
+eval_commands() {
+  BOSS_GROUP_STARTED=false
+
+  while read group; do
+    LINE_COMMAND_INDEX=0
+    CURRENT_GROUP_IS_BOSS_GROUP=false
+
+    while read line_command; do
+      if [ "$LINE_COMMAND_INDEX" = 0 ] && [ "$line_command" = 0 ]; then
+        BOSS_GROUP_STARTED=true
+        CURRENT_GROUP_IS_BOSS_GROUP=true
+      fi
+      # All we need to do here is evaluate commands that occur after the "expire" argument for group 0.
+      if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = true ]; then
+        if [ "$LINE_COMMAND_INDEX" -gt 1 ]; then
+          # check for cd command and echo you can't do that.
+          eval "${line_command} &"
+        fi
+      fi
+
+      LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
+    done <<EOT
+      `echo "$group" | sed -n 1'p' | tr '|' '\n'`
+EOT
+
+    if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = true ]; then
       # This should always make meow-pids-0.txt
-      jobs -p >>$CONFIG_RELATIVE_DIRECTORY/meow-pids-$GROUP_INDEX.txt
-    else
+      jobs -p >>$CONFIG_RELATIVE_DIRECTORY/meow-pids-0.txt
+    fi
+
+    if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = false ]; then
       apple_terminal $group || iterm $group || gnome $group &
     fi
 
-  GROUP_INDEX=$((GROUP_INDEX + 1))
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
 # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
   done <<EOT
-  $(echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n')
+  `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
 EOT
 
   # Tell the first command to come to the foreground.
-  fg %1
+  if [ "$BOSS_GROUP_STARTED" = true ]; then
+    fg %1
+  else
+    TRAP_EXIT=false
+  fi
 }
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
   cat /opt/meow/help.txt
 elif [ "$1" = "clean" ]; then
   kill_started_processes
-elif [ "$1" = "generate" ]; then
+elif [ "$1" = "generate" ] || [ "$1" = "gen" ]; then
   sh /opt/meow/generate.sh `pwd`
 elif [ "$1" = "update" ]; then
   echo "Update"
@@ -232,8 +342,12 @@ else
   CONFIG_LINUX_SHELL=bash &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
-  PIDS_TO_KILL="" &&
-  read_meow_txt_file && #$@
+  read_meow_txt_file &&
+  if [ ! $# -eq 0 ]; then
+    handle_command_line_args $@
+  else
+    true
+  fi &&
   eval_commands
 fi
 

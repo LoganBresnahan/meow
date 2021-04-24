@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Exits if an error occurs.
+set -e
+
 echo "Installing Meow."
 echo "Copying meow into /opt/meow"
 

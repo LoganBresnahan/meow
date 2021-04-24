@@ -3,6 +3,10 @@ Meow is a small program created to help spawn multiple processes when developing
 
 <br>
 
+### Need common gotcha section
+- won't work for repl's. (things waiting for input)
+- if your process exits for it's own reason and you have it set to expire it may look like it didn't work.
+
 ## Installation
 1. Clone this repository.
 

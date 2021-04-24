@@ -19,7 +19,7 @@ gnome_trap() {
       echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid";
     fi
 
-    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER+1))
+    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
   done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
   # Erase the meow-pids-N.txt file.
@@ -50,7 +50,7 @@ while read gnome_file_line_command; do
 
   GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
 done <<EOT
-    $(echo "$@" | sed -n 1'p' | tr '|' '\n')
+  `echo "$@" | sed -n 1'p' | tr '|' '\n'`
 EOT
 
 jobs -p >>$GNOME_RELATIVE_DIRECTORY/meow-pids-${GNOME_GROUP}.txt
