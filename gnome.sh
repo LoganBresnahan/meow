@@ -3,72 +3,62 @@
 # Enable jobs control.
 set -m
 
-GNOME_FILE_GROUP=0
-GNOME_LIVE_OR_DIE=""
-# echo $1
-# echo $@
-# echo $CONFIG_RELATIVE_DIRECTORY
+# https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
+gnomelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
-# GET THE RELATIVE DIRECTORY FROM THE INCOMING ARGS AND THE EXPIRE OR ENDURE
-# IF ENDURE THEN OUR TRAP HERE WILL KILL THE PROCESSES
+gnome_trap() {
+  GNOME_LINE_NUMBER=0
 
-# gnome_trap() {
-#   # If we told this to originally live by the Boss process then we need to handle killing the processes in our meow-pids-N.txt file.
-#   if [[ "$GNOME_LIVE_OR_DIE" = "live" ]]; then
-#     LINE_NUMBER=0
+  # Reading the pids.txt file.
+  while read -r gnome_pid; do
+    # If the process is still alive then kill it.
+    if ps -p $gnome_pid > /dev/null; then
+      echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid";
+      kill $gnome_pid;
+    else
+      echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid";
+    fi
 
-#     # Reading the pids.txt file.
-#     while read -r pid; do
-#       # If the process is still alive then kill it.
-#       if ps -p $pid > /dev/null; then
-#         echo "$LINE_NUMBER. Killing  Process: $pid";
-#         kill $pid;
-#       else
-#         echo "$LINE_NUMBER. Process Already Dead: $pid";
-#       fi
+    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER+1))
+  done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
-#       LINE_NUMBER=$((LINE_NUMBER+1))
-#     done < meow-pids-1.txt
+  # Erase the meow-pids-N.txt file.
+  truncate -s 0 $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
-#     # Erase the meow-pids-N.txt file.
-#     truncate -s 0 meow-pids-1.txt
-#   fi
+  echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+}
 
-#   echo "Process cleanup done from gnome.sh"
-# }
+trap gnome_trap EXIT
 
-# trap gnome_trap EXIT;
+GNOME_GROUP=0
+GNOME_FILE_INDEX=0
+GNOME_RELATIVE_DIRECTORY=""
 
-# GNOME_FILE_COMMAND_INDEX=0
+while read gnome_file_line_command; do
+  if [ "$GNOME_FILE_INDEX" = 0 ]; then
+    GNOME_RELATIVE_DIRECTORY=$gnome_file_line_command
+  elif [ "$GNOME_FILE_INDEX" = 1 ]; then
+    GNOME_GROUP=$gnome_file_line_command
+  elif [ "$GNOME_FILE_INDEX" -gt 2 ]; then
+    if gnomelinebeginswith "cd" $gnome_file_line_command; then
+      # Do nothing here.
+      echo $gnome_file_line_command > /dev/null
+    else
+      eval "${gnome_file_line_command} &"
+      # echo "${gnome_file_line_command} &"
+    fi
+  fi
 
-# while read gnome_file_line_command; do
-#   if [[ "$GNOME_FILE_COMMAND_INDEX" = 0 ]]; then
-#     GNOME_FILE_GROUP=$gnome_file_line_command
-#   elif [[ "$GNOME_FILE_COMMAND_INDEX" = 1 ]]; then
-#     GNOME_LIVE_OR_DIE=$gnome_file_line_command
-#   elif [[ "$GNOME_FILE_COMMAND_INDEX" = 2 ]]; then
-#     if [[ "$gnome_file_line_command" = "cd "* ]]; then
-#       # eval "${gnome_file_line_command}"
-#       echo "${gnome_file_line_command}"
-#     else
-#       # eval "${gnome_file_line_command} &"
-#       echo "${gnome_file_line_command} &"
-#     fi
-#   else
-#     # eval "${gnome_file_line_command} &"
-#     echo "${gnome_file_line_command} &"
-#   fi
-
-#   GNOME_FILE_COMMAND_INDEX=$((GNOME_FILE_COMMAND_INDEX + 1))
-# done <<EOT
-#     $(echo "$@" | sed -n 1'p' | tr '|' '\n')
-# EOT
+  GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
+done <<EOT
+    $(echo "$@" | sed -n 1'p' | tr '|' '\n')
+EOT
 
 
-# echo meow-pids-${GNOME_FILE_GROUP}.txt
+# echo meow-pids-${GNOME_GROUP}.txt
 # I need to save the original directory and write this file to that
-# jobs -p >>meow-pids-${GNOME_FILE_GROUP}.txt
-# fg %1
+jobs -p >>$GNOME_RELATIVE_DIRECTORY/meow-pids-${GNOME_GROUP}.txt
+fg %1
 
 # Copyright 2021 Logan Bresnahan
 

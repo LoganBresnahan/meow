@@ -3,22 +3,6 @@
 # Enable jobs control.
 set -m
 
-# if [ "$1" = "clean" ]; then
-#   kill_started_processes
-# elif [ "$1" = "all" ]; then
-#   # An argument of "all" will spawn c3po.
-#   bundle exec rails s -p 5000 -e remote_development &
-#   yarn run start:dev &
-#   apple_terminal || iterm || gnome &
-#   jobs -p >>tmp/pids.txt &&
-#   fg bundle exec rails s -p 5000 -e remote_development
-# else
-#   bundle exec rails s -p 5000 -e remote_development &
-#   yarn run start:dev &
-#   jobs -p >>tmp/pids.txt &&
-#   fg bundle exec rails s -p 5000 -e remote_development
-# fi
-
 # https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
 linebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
@@ -41,7 +25,7 @@ kill_started_processes() {
 
       # Erase the meow-pids-N.txt file.
       truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$saved_pid_groups.txt
-      echo "Process cleanup done from meow.sh"
+      echo "Process cleanup done for meow-pids-${saved_pid_groups}.txt"
     done <<EOT
       $(echo "$PIDS_TO_KILL" | sed -n 1'p' | tr '|' '\n')
 EOT
@@ -97,9 +81,9 @@ gnome() {
   while read gnome_line_command; do
     if [ "$GNOME_COMMAND_INDEX" = 1 ]; then
       if [ "$gnome_line_command" = "expire" ]; then
-        GNOME_SHOULD_EXIT="exit"
+        GNOME_SHOULD_EXIT="exec"
       else
-        GNOME_SHOULD_EXIT="echo 'endure' > /dev/null"
+        GNOME_SHOULD_EXIT="sh"
       fi
     elif [ "$GNOME_COMMAND_INDEX" -gt 1 ]; then
       if linebeginswith "cd" $gnome_line_command; then
@@ -119,7 +103,7 @@ EOT
 
   # Check if Gnome Terminal is in use.
   if [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
-    gnome-terminal --tab --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "sh /opt/meow/gnome.sh '${GNOME_ARGS}' && $GNOME_SHOULD_EXIT; exec $CONFIG_LINUX_SHELL"
+    gnome-terminal --tab --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
     # gnome-terminal --tab --working-directory ~/code/c3po -- bash -ic 'bundle exec rails server -p 3000 -e remote_development & yarn run start:dev & jobs -p >>~/code/membership_service/tmp/pids.txt && fg bundle exec rails s -p 3000 -e remote_development && exit; exec bash'
   else
     false
@@ -260,7 +244,7 @@ elif [ "$1" = "update" ]; then
 elif [ "$1" = "uninstall" ]; then
   sudo sh /opt/meow/uninstall.sh
 else
-  CONFIG_RELATIVE_DIRECTORY=tmp &&
+  CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
   CONFIG_LINUX_SHELL=bash &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
