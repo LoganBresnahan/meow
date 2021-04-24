@@ -1,0 +1,51 @@
+--comment Comments must be on one line in the meow.txt file and can go anywhere
+
+--start-config
+--comment The config section. Displayed below are the only current config options.
+--comment Configuration must be written between the --start-config and --end-config flags.
+
+--comment Configure which relative directory to your project the Meow pid files should be written to.
+relative-directory=tmp
+
+--comment If you're on Linux you should tell Meow what shell you are using.
+linux-shell=bash
+
+--end-config
+--comment If you're happy with the above default values. You can delete the entire config section if desired.
+
+
+--comment The commands section. Here is where you provide Meow the processes you would like it to start.
+--start-commands
+
+sleep 1000
+sleep 1000
+
+--new-tab-expire
+
+cd $HOME/my_project_two
+sleep 1000
+sleep 1000
+
+--new-tab-endure
+
+cd $HOME/my_project_three
+sleep 1000
+sleep 1000
+
+--end-commands
+--comment Copyright 2021 Logan Bresnahan
+
+--comment This file is part of Meow.
+
+--comment Meow is free software: you can redistribute it and/or modify
+--comment it under the terms of the GNU General Public License as published by
+--comment the Free Software Foundation, either version 3 of the License, or
+--comment (at your option) any later version.
+
+--comment Meow is distributed in the hope that it will be useful,
+--comment but WITHOUT ANY WARRANTY; without even the implied warranty of
+--comment MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+--comment GNU General Public License for more details.
+
+--comment You should have received a copy of the GNU General Public License
+--comment along with Meow. If not, see <https://www.gnu.org/licenses/>.

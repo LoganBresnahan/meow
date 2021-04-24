@@ -45,7 +45,6 @@ while read gnome_file_line_command; do
       echo $gnome_file_line_command > /dev/null
     else
       eval "${gnome_file_line_command} &"
-      # echo "${gnome_file_line_command} &"
     fi
   fi
 
@@ -54,9 +53,6 @@ done <<EOT
     $(echo "$@" | sed -n 1'p' | tr '|' '\n')
 EOT
 
-
-# echo meow-pids-${GNOME_GROUP}.txt
-# I need to save the original directory and write this file to that
 jobs -p >>$GNOME_RELATIVE_DIRECTORY/meow-pids-${GNOME_GROUP}.txt
 fg %1
 

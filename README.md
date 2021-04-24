@@ -29,10 +29,10 @@ reset && meow --help
 ```
 
 ## Uninstall
-As the root user execute the `uninstall.sh` script.
+Execute the meow uninstall command.
 
 ```sh
-sudo ./meow/uninstall.sh
+meow uninstall
 ```
 
 ## Usage

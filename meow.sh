@@ -103,8 +103,7 @@ EOT
 
   # Check if Gnome Terminal is in use.
   if [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
-    gnome-terminal --tab --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
-    # gnome-terminal --tab --working-directory ~/code/c3po -- bash -ic 'bundle exec rails server -p 3000 -e remote_development & yarn run start:dev & jobs -p >>~/code/membership_service/tmp/pids.txt && fg bundle exec rails s -p 3000 -e remote_development && exit; exec bash'
+    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
   else
     false
   fi
@@ -155,12 +154,10 @@ read_meow_txt_file() {
 
       continue
     fi
-    # SHOULD I ADD THE DIRECTORY AND LINUX SHELL TO THE GROUP STRING? THEN COMMANDS DO NEED TO BE BELOW CONFIG AND BREAK FROM --end-commands
+
     if [ "$START_OF_COMMANDS" = true ]; then
       if linebeginswith "--end-commands" $line; then
         START_OF_COMMANDS=false
-        # We have reached the end of the commands. Use "break" to stop evaluating.
-        # break
       elif [ "$FIRST_COMMAND" = true ]; then
         # This condition signifies we have reached the first command.
         TAB_GROUPS="${GROUP_NUMBER}|expire|${line}"
@@ -220,25 +217,12 @@ EOT
   fg %1
 }
 
-# meow-live at top of group means that i should write the pids to a new file
-# meow-live in front of a line means I should put something in front of the pid in the file but this is probably not possible and I won't do it.
-# the clean process should ignore this and just kill the pid
-
-# send ctrl-c process to the new tab as well
-# think about memory mode to just pass command line commands.
-# test current ctrl-c trap in membership_service
-
-# meow command to generate a meow.txt file
-
-
-#open a new tab and run script with arguments for if we need to kill all at once.
-
-if [ "$1" = "--help" ]; then
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
   cat /opt/meow/help.txt
 elif [ "$1" = "clean" ]; then
   kill_started_processes
 elif [ "$1" = "generate" ]; then
-  echo "Create meow.txt"
+  sh /opt/meow/generate.sh `pwd`
 elif [ "$1" = "update" ]; then
   echo "Update"
 elif [ "$1" = "uninstall" ]; then
@@ -252,8 +236,6 @@ else
   read_meow_txt_file && #$@
   eval_commands
 fi
-
-
 
 # Copyright 2021 Logan Bresnahan
 
