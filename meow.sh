@@ -224,61 +224,6 @@ EOT
   TAB_GROUPS=$NEW_TAB_GROUPS
 }
 
-# eval_commands() {
-#   if [ ! -z $1 ]; then
-#     GROUP_INDEX=$1
-#     BOSS_GROUP_STARTED=false
-#   else
-#     GROUP_INDEX=0
-#     BOSS_GROUP_STARTED=true
-#   fi
-
-#   while read group; do
-#     if [ "$GROUP_INDEX" = 0 ]; then
-#       LINE_COMMAND_INDEX=0
-
-#       while read line_command; do
-#         if [ "$LINE_COMMAND_INDEX" = 0 ] && [ "$GROUP_INDEX" = 0 ] && [ "$line_command" != 0 ]; then
-#           echo "I AM HERE NOW"
-#           # If this condition is not met it means that meow was passed command line args without 0 aka the Boss group.
-#           BOSS_GROUP_STARTED=false
-#           # break
-#         fi
-#         # All we need to do here is evaluate commands that occur after the "expire" argument for group 0.
-#         if [ "$BOSS_GROUP_STARTED" = true ]; then
-#           if [ "$LINE_COMMAND_INDEX" -gt 1 ]; then
-#             eval "${line_command} &"
-#           fi
-#         fi
-
-#         LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
-#       done <<EOT
-#       `echo "$group" | sed -n 1'p' | tr '|' '\n'`
-# EOT
-#       # This should always make meow-pids-0.txt
-#       if [ "$BOSS_GROUP_STARTED" = true ]; then
-#         jobs -p >>$CONFIG_RELATIVE_DIRECTORY/meow-pids-$GROUP_INDEX.txt
-#       fi
-#     else
-#       echo "LSKDJFLSJFLSKJLSKDJFLSKDJF"
-#       apple_terminal $group || iterm $group || gnome $group &
-#     fi
-
-#   GROUP_INDEX=$((GROUP_INDEX + 1))
-# # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
-# # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
-#   done <<EOT
-#   `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
-# EOT
-
-#   # Tell the first command to come to the foreground.
-#   if [ "$BOSS_GROUP_STARTED" = true ]; then
-#     fg %1
-#   else
-#     eval_commands $GROUP_INDEX
-#   fi
-# }
-
 eval_commands() {
   BOSS_GROUP_STARTED=false
 
