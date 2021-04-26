@@ -1,5 +1,5 @@
-- Display help.               Command: meow help or meow --help or meow -h
-- Generate a meow.txt         Command: meow gen or meow generate
+- Display help.               Command: meow --help, -h
+- Generate a meow.txt         Command: meow generate, gen
   template file in your
   current working directory.
 - Update Meow.                Command: meow update

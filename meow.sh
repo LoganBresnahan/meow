@@ -6,6 +6,15 @@ set -m
 # https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
 linebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
+# https://unix.stackexchange.com/questions/598036/how-to-check-if-variable-is-integer-avoid-problem-with-spaces-around-in-posix#answer-598047
+is_integer () {
+  case "${1#[+-]}" in
+    (*[!0123456789]*) false ;;
+    ('')              false ;;
+    (*)               true ;;
+  esac
+}
+
 kill_started_processes() {
   if [ "$TRAP_EXIT" = true ]; then
     while read saved_tab_group; do
@@ -194,34 +203,50 @@ read_meow_txt_file() {
 
 handle_command_line_args() {
   NEW_TAB_GROUPS=""
-  SORTED_ARGS=`for i in $@; do echo $i ; done | sort -nu`
+  SORTED_ARGS=`
+    for i in $@; do
+      if is_integer $1; then
+        echo $i
+      else
+        continue
+      fi
+    done | sort -nu
+  `
 
-  for command_line_arg in `eval echo $SORTED_ARGS`; do
-    while read prepared_group; do
-      PREPARED_GROUP_LINE_INDEX=0
+  if [ ! -z "$SORTED_ARGS" ]; then
+    for command_line_arg in `eval echo $SORTED_ARGS`; do
+      while read prepared_group; do
+        PREPARED_GROUP_LINE_INDEX=0
 
-      while read prepared_group_line; do
-        # Index 0 represents the position of the original group number.
-        if [ "$PREPARED_GROUP_LINE_INDEX" = 0 ]; then
-          if [ "$prepared_group_line" = "$command_line_arg" ]; then
-            if [ "$NEW_TAB_GROUPS" = "" ]; then
-              NEW_TAB_GROUPS="${prepared_group}"
-            else
-              NEW_TAB_GROUPS="${NEW_TAB_GROUPS};${prepared_group}"
+        while read prepared_group_line; do
+          # Index 0 represents the position of the original group number.
+          if [ "$PREPARED_GROUP_LINE_INDEX" = 0 ]; then
+            if [ "$prepared_group_line" = "$command_line_arg" ]; then
+              if [ "$NEW_TAB_GROUPS" = "" ]; then
+                NEW_TAB_GROUPS="${prepared_group}"
+              else
+                NEW_TAB_GROUPS="${NEW_TAB_GROUPS};${prepared_group}"
+              fi
             fi
           fi
-        fi
 
-        PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
+          PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
+        done <<EOT
+          `echo "$prepared_group" | sed -n 1'p' | tr '|' '\n'`
+EOT
       done <<EOT
-        `echo "$prepared_group" | sed -n 1'p' | tr '|' '\n'`
+        `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
 EOT
-    done <<EOT
-      `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
-EOT
-  done
+    done
 
-  TAB_GROUPS=$NEW_TAB_GROUPS
+    TAB_GROUPS=$NEW_TAB_GROUPS
+  else
+    echo "*** Bad command line arguments: ${@}"
+    echo ""
+    cat /opt/meow/help.txt
+    TRAP_EXIT=false
+    exit 1
+  fi
 }
 
 eval_commands() {
@@ -261,7 +286,7 @@ EOT
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
 # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
   done <<EOT
-  `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+    `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
 EOT
 
   # Tell the first command to come to the foreground.
