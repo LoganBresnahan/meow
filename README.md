@@ -8,10 +8,10 @@ Meow is a small program created to help spawn multiple processes when developing
 - if your process exits for it's own reason and you have it set to expire it may look like it didn't work.
 
 ## Installation
-1. Clone this repository.
+1. Clone the stable branch with the following command.
 
 ```sh
-git clone meow
+git clone --single-branch --branch stable git@github.com:LoganBresnahan/meow.git
 ```
 
 2. As the root user execute the `install.sh` script.

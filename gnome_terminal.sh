@@ -7,23 +7,26 @@ set -m
 gnomelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
 gnome_trap() {
-  GNOME_LINE_NUMBER=0
+  if [ -f "$GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt" ]; then
+    GNOME_LINE_NUMBER=0
 
-  # Reading the pids.txt file.
-  while read -r gnome_pid; do
-    # If the process is still alive then kill it.
-    if ps -p $gnome_pid > /dev/null; then
-      echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid";
-      kill $gnome_pid;
-    else
-      echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid";
-    fi
+    # Reading the pids.txt file.
+    while read -r gnome_pid; do
+      # If the process is still alive then kill it.
+      if ps -p $gnome_pid > /dev/null; then
+        echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid";
+        kill $gnome_pid;
+      else
+        echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid";
+      fi
 
-    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
-  done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+      GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
+    done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
-  # Erase the meow-pids-N.txt file.
-  truncate -s 0 $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+    # Delete the meow-pids-N.txt file.
+    rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+    # truncate -s 0 $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+  fi
 
   echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
 }

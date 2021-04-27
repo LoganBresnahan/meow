@@ -5,11 +5,11 @@ set -e
 
 echo "Copying the meow.txt template to ${1}"
 
-cp /opt/meow/meow-template.txt $1/meow.txt
+cp -i /opt/meow/meow-template.txt $1/meow.txt
 
 sed -i '/--comment Copyright 2021 Logan Bresnahan/Q' $1/meow.txt
 
-echo "Complete."
+echo "End Meow generate."
 
 # Copyright 2021 Logan Bresnahan
 

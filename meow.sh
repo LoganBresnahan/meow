@@ -24,7 +24,7 @@ kill_started_processes() {
         if [ "$SAVED_TAB_GROUP_LINE_INDEX" = 0 ]; then
           PREVIOUS_SAVED_TAB_GROUP_LINE=$saved_tab_group_line
         elif [ "$SAVED_TAB_GROUP_LINE_INDEX" = 1 ]; then
-          if [ "$saved_tab_group_line" = "expire" ]; then
+          if [ "$saved_tab_group_line" = "expire" ] && [ -f "$CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt" ]; then
             KILL_LINE_NUMBER=0
 
             while read -r pid; do
@@ -39,8 +39,9 @@ kill_started_processes() {
               KILL_LINE_NUMBER=$((KILL_LINE_NUMBER + 1))
             done < $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
 
-            # Erase the meow-pids-N.txt file.
-            truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
+            # Delete the meow-pids-N.txt file.
+            rm $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
+            # truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
             echo "Process cleanup done for meow-pids-${PREVIOUS_SAVED_TAB_GROUP_LINE}.txt"
           fi
         fi
@@ -52,6 +53,10 @@ EOT
     done <<EOT
       `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
 EOT
+  fi
+
+  if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
+    sh /opt/meow/update.sh
   fi
 }
 
@@ -76,7 +81,7 @@ apple_terminal() {
 }
 
 # For Mac's iTerm2.
-iterm() {
+iterm_terminal() {
   if [ "$TERM_PROGRAM" = "iTerm.app" ]; then
     false
 #   osascript &>/dev/null <<EOF
@@ -96,7 +101,7 @@ iterm() {
 }
 
 # For Linux's Gnome Terminal.
-gnome() {
+gnome_terminal() {
   GNOME_COMMAND_INDEX=0
   GNOME_SHOULD_EXIT=""
   GNOME_WORKING_DIRECTORY=`pwd`
@@ -126,7 +131,7 @@ EOT
 
   # Check if Gnome Terminal is in use.
   if [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
-    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
+    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_terminal.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
   else
     false
   fi
@@ -168,6 +173,8 @@ read_meow_txt_file() {
       elif linebeginswith "linux-shell=" $line; then
         # Variable is used in the gnome function.
         CONFIG_LINUX_SHELL="${line##*=}"
+      elif linebeginswith "auto-check-updates=" $line; then
+        CONFIG_AUTO_CHECK_UPDATES="${line##*=}"
       # else
       #   # I think I need this continue if someone writes some random string because scripting won't just return nil if a condition is not met I think.
       #   continue
@@ -280,7 +287,7 @@ EOT
     fi
 
     if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = false ]; then
-      apple_terminal $group || iterm $group || gnome $group &
+      apple_terminal $group || iterm_terminal $group || gnome_terminal $group &
     fi
 
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
@@ -310,6 +317,7 @@ elif [ "$1" = "uninstall" ]; then
 else
   CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
   CONFIG_LINUX_SHELL=bash &&
+  CONFIG_AUTO_CHECK_UPDATES=true &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
   read_meow_txt_file &&

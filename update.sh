@@ -8,22 +8,27 @@ if [ "$1" = "user_initiated" ]; then
 fi
 
 (cd /opt/meow/;
+  CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
   CURRENT_MEOW_VERSION=`git rev-parse HEAD`
   LATEST_MEOW_VERSION=`git rev-parse origin/boss`
 
-  if [ "$CURRENT_MEOW_VERSION" = "$LATEST_MEOW_VERSION" ]; then
-    while true; do
-      read -p "New version found. Do you want to update? Yy|Nn >" yes_or_no
-      case $yes_or_no in
-        [Yy]* ) git pull; break;;
-        [Nn]* ) exit;;
-        * ) echo "Yy|Nn";;
-      esac
-    done
-  else
-    if [ "$1" = "user_initiated" ]; then
-      echo "You are already up-to-date."
+  if [ "$CURRENT_BRANCH" = "stable" ]; then
+    if [ "$CURRENT_MEOW_VERSION" != "$LATEST_MEOW_VERSION" ]; then
+      while true; do
+        read -p "New version of Meow found. Do you want to update? Yy|Nn > " yes_or_no
+        case $yes_or_no in
+          [Yy]* ) git fetch origin boss && git reset --hard FETCH_HEAD && git clean -df && echo "Update complete." && break;;
+          [Nn]* ) echo "Update cancelled." && break;;
+          * ) echo "Yy|Nn";;
+        esac
+      done
+    else
+      if [ "$1" = "user_initiated" ]; then
+        echo "You are already up-to-date."
+      fi
     fi
+  else
+    echo "You are not on the stable branch. Cannot Update. Navigate to /opt/meow and run 'git checkout stable'. You can then run 'meow update'."
   fi
 )
 

@@ -10,6 +10,10 @@ relative-directory=tmp
 --comment If you're on Linux you should tell Meow what shell you are using.
 linux-shell=bash
 
+--comment When set to true, Meow will run a silent update check when Meow terminates.
+--comment If an update is found. Meow will prompt you.
+auto-check-updates=true
+
 --end-config
 --comment If you're happy with the above default values. You can delete the entire config section if desired.
 
