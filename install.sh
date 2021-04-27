@@ -6,10 +6,10 @@ set -e
 echo "Installing Meow."
 echo "Copying meow into /opt/meow"
 
-cp -a -r `pwd` /opt/meow
+cp -a `pwd` /opt/meow
 
 echo "************************************************************************************************************************************************"
-echo "Add 'export PATH=\$PATH:/opt/meow/executable' to your shell's profile then reload your shell with 'reset' and the installation will be complete."
+echo "Add 'export PATH=\$PATH:/opt/meow/executable' to your shell's profile then reload your shell and the installation will be complete."
 echo "************************************************************************************************************************************************"
 
 # Copyright 2021 Logan Bresnahan

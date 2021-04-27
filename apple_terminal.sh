@@ -3,6 +3,9 @@
 # Enable jobs control.
 set -m
 
+echo "HI FROM APPLE TERMINAL"
+sleep 5
+
 # Copyright 2021 Logan Bresnahan
 
 # This file is part of Meow.

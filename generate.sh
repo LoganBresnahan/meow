@@ -7,8 +7,6 @@ echo "Copying the meow.txt template to ${1}"
 
 cp -i /opt/meow/meow-template.txt $1/meow.txt
 
-sed -i '/--comment Copyright 2021 Logan Bresnahan/Q' $1/meow.txt
-
 echo "End Meow generate."
 
 # Copyright 2021 Logan Bresnahan

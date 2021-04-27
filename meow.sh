@@ -66,15 +66,11 @@ trap kill_started_processes EXIT
 # For Mac's default Terminal application.
 apple_terminal() {
   if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-    false
-#   osascript &>/dev/null <<EOF
-#     tell application "System Events" to keystroke "t" using {command down}
-#     tell application "Terminal" to do script "cd ~/code/c3po" in front window
-#     tell application "Terminal" to do script "bundle exec rails server -p 3000 -e remote_development &" in front window
-#     tell application "Terminal" to do script "yarn run start:dev &" in front window
-#     tell application "Terminal" to do script "jobs -p >>~/code/membership_service/tmp/pids.txt &&" in front window
-#     tell application "Terminal" to do script "fg bundle exec rails s -p 3000 -e remote_development && exit" in front window
-# EOF
+    echo "HI"
+    osascript &>/dev/null <<EOF
+      tell application "System Events" to keystroke "t" using {command down}
+      tell application "Terminal" to do script "sh /opt/meow/apple_terminal.sh && exit" in front window
+EOF
   else
     false
   fi

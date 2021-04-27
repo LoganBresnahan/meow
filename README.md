@@ -29,7 +29,7 @@ meow --help
 4. If the meow command is not executing try reseting your shell.
 
 ```sh
-reset && meow --help
+meow --help
 ```
 
 ## Uninstall
