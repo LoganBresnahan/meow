@@ -304,7 +304,7 @@ elif [ "$1" = "clean" ]; then
 elif [ "$1" = "generate" ] || [ "$1" = "gen" ]; then
   sh /opt/meow/generate.sh `pwd`
 elif [ "$1" = "update" ]; then
-  echo "Update"
+  sh /opt/meow/update.sh "user_initiated"
 elif [ "$1" = "uninstall" ]; then
   sudo sh /opt/meow/uninstall.sh
 else
