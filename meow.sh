@@ -30,18 +30,18 @@ kill_started_processes() {
             while read -r pid; do
               # If the process is still alive then kill it.
               if ps -p $pid > /dev/null; then
-                echo "$KILL_LINE_NUMBER. Killing  Process: $pid";
-                kill $pid;
+                echo "$KILL_LINE_NUMBER. Killing  Process: $pid"
+                kill $pid
               else
-                echo "$KILL_LINE_NUMBER. Process Already Dead: $pid";
+                echo "$KILL_LINE_NUMBER. Process Already Dead: $pid"
               fi
 
               KILL_LINE_NUMBER=$((KILL_LINE_NUMBER + 1))
             done < $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
 
             # Delete the meow-pids-N.txt file.
-            rm $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
-            # truncate -s 0 $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt
+            rm $CONFIG_RELATIVE_DIRECTORY/meow-pids-$PREVIOUS_SAVED_TAB_GROUP_LINE.txt &>/dev/null
+
             echo "Process cleanup done for meow-pids-${PREVIOUS_SAVED_TAB_GROUP_LINE}.txt"
           fi
         fi
@@ -55,22 +55,51 @@ EOT
 EOT
   fi
 
+  rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
+
   if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
     sh /opt/meow/update.sh
   fi
 }
 
-# Listens for CTRL-C input and calls kill_started_processes.
 trap kill_started_processes EXIT
 
 # For Mac's default Terminal application.
 apple_terminal() {
   if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-    echo "HI"
+    APPLE_COMMAND_INDEX=0
+    APPLE_SHOULD_EXIT=""
+    APPLE_WORKING_DIRECTORY=`pwd`
+
+    while read apple_line_command; do
+      if [ "$APPLE_COMMAND_INDEX" = 1 ]; then
+        if [ "$apple_line_command" = "expire" ]; then
+          APPLE_SHOULD_EXIT="exit"
+        else
+          APPLE_SHOULD_EXIT="true"
+        fi
+      elif [ "$APPLE_COMMAND_INDEX" -gt 1 ]; then
+        if linebeginswith "cd" $apple_line_command; then
+          APPLE_WORKING_DIRECTORY="${apple_line_command##*cd}"
+          # Nothing else to do with this while loop so break.
+          break
+        fi
+      fi
+
+      APPLE_COMMAND_INDEX=$((APPLE_COMMAND_INDEX + 1))
+    done <<EOT
+      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+EOT
+
+    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+
     osascript &>/dev/null <<EOF
       tell application "System Events" to keystroke "t" using {command down}
-      tell application "Terminal" to do script "sh /opt/meow/apple_terminal.sh && exit" in front window
+      tell application "Terminal" to do script "cd $APPLE_WORKING_DIRECTORY" in front window
+      tell application "Terminal" to do script "sh /opt/meow/apple_tab.sh '${APPLE_ARGS}'" in front window
+      tell application "Terminal" to do script "$APPLE_SHOULD_EXIT" in front window
 EOF
+  # https://stuartdotson.com/blog/how-to-programmatically-open-a-new-terminal-tab-or-window/
   else
     false
   fi
@@ -79,18 +108,41 @@ EOF
 # For Mac's iTerm2.
 iterm_terminal() {
   if [ "$TERM_PROGRAM" = "iTerm.app" ]; then
-    false
-#   osascript &>/dev/null <<EOF
-#     tell application "iTerm"
-#       activate
-#       tell current window to set tb to create tab with default profile
-#       tell current session of current window to write text "cd ~/code/c3po"
-#       tell current session of current window to write text "bundle exec rails server -p 3000 -e remote_development &"
-#       tell current session of current window to write text "yarn run start:dev &"
-#       tell current session of current window to write text "jobs -p >>~/code/membership_service/tmp/pids.txt &&"
-#       tell current session of current window to write text "fg bundle exec rails s -p 3000 -e remote_development && exit"
-#     end tell
-# EOF
+    ITERM_COMMAND_INDEX=0
+    ITERM_SHOULD_EXIT=""
+    ITERM_WORKING_DIRECTORY=`pwd`
+
+    while read iterm_line_command; do
+      if [ "$ITERM_COMMAND_INDEX" = 1 ]; then
+        if [ "$iterm_line_command" = "expire" ]; then
+          ITERM_SHOULD_EXIT="exit"
+        else
+          ITERM_SHOULD_EXIT="true"
+        fi
+      elif [ "$ITERM_COMMAND_INDEX" -gt 1 ]; then
+        if linebeginswith "cd" $iterm_line_command; then
+          ITERM_WORKING_DIRECTORY="${iterm_line_command##*cd}"
+          # Nothing else to do with this while loop so break.
+          break
+        fi
+      fi
+
+      ITERM_COMMAND_INDEX=$((ITERM_COMMAND_INDEX + 1))
+    done <<EOT
+      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+EOT
+
+    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+
+    osascript &>/dev/null <<EOF
+      tell application "iTerm"
+        activate
+        tell current window to set tb to create tab with default profile
+        tell current session of current window to write text "cd $ITERM_WORKING_DIRECTORY"
+        tell current session of current window to write text "sh /opt/meow/apple_tab.sh '${ITERM_ARGS}'"
+        tell current session of current window to write text "$ITERM_SHOULD_EXIT"
+      end tell
+EOF
   else
     false
   fi
@@ -98,43 +150,43 @@ iterm_terminal() {
 
 # For Linux's Gnome Terminal.
 gnome_terminal() {
-  GNOME_COMMAND_INDEX=0
-  GNOME_SHOULD_EXIT=""
-  GNOME_WORKING_DIRECTORY=`pwd`
-
-  while read gnome_line_command; do
-    if [ "$GNOME_COMMAND_INDEX" = 1 ]; then
-      if [ "$gnome_line_command" = "expire" ]; then
-        GNOME_SHOULD_EXIT="exec"
-      else
-        GNOME_SHOULD_EXIT="sh"
-      fi
-    elif [ "$GNOME_COMMAND_INDEX" -gt 1 ]; then
-      if linebeginswith "cd" $gnome_line_command; then
-        GNOME_WORKING_DIRECTORY="${gnome_line_command##*cd}"
-        # Nothing else to do with this while loop so break.
-        break
-      fi
-    fi
-
-    GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
-  done <<EOT
-    `echo "$@" | sed -n 1'p' | tr '|' '\n'`
-EOT
-
-  GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
-  GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
-
   # Check if Gnome Terminal is in use.
   if [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
-    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_terminal.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
+    GNOME_COMMAND_INDEX=0
+    GNOME_SHOULD_EXIT=""
+    GNOME_WORKING_DIRECTORY=`pwd`
+
+    while read gnome_line_command; do
+      if [ "$GNOME_COMMAND_INDEX" = 1 ]; then
+        if [ "$gnome_line_command" = "expire" ]; then
+          GNOME_SHOULD_EXIT="exec"
+        else
+          GNOME_SHOULD_EXIT="sh"
+        fi
+      elif [ "$GNOME_COMMAND_INDEX" -gt 1 ]; then
+        if linebeginswith "cd" $gnome_line_command; then
+          GNOME_WORKING_DIRECTORY="${gnome_line_command##*cd}"
+          # Nothing else to do with this while loop so break.
+          break
+        fi
+      fi
+
+      GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
+    done <<EOT
+      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+EOT
+
+    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+    GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
+
+    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
   else
+    echo "No supported terminal found for spawning new tabs. The options include; Apple Terminal, iTerm2, and Gnome Terminal."
     false
   fi
 }
 
 read_meow_txt_file() {
-  # maybe clear the meow.txt file of spaces on the left and right
   # cat meow.txt | awk '{$1=$1};1'
   START_OF_CONFIG=false
   START_OF_COMMANDS=false
@@ -142,7 +194,7 @@ read_meow_txt_file() {
   GROUP_NUMBER=0
 
   while read -r line; do
-    if linebeginswith "--comment" $line || [ -z "$line" ]; then
+    if linebeginswith "-c" $line || [ -z "$line" ]; then
       # Ignore comments and empty lines.
       continue
     fi
@@ -158,7 +210,7 @@ read_meow_txt_file() {
     if [ "$START_OF_CONFIG" = true ]; then
       if linebeginswith "--end-config" $line; then
         START_OF_CONFIG=false
-      elif linebeginswith "relative-directory=" $line; then
+      elif linebeginswith "writable-relative-directory=" $line; then
         CONFIG_RELATIVE_DIRECTORY="${line##*=}"
 
         if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
@@ -167,13 +219,17 @@ read_meow_txt_file() {
 
         CONFIG_RELATIVE_DIRECTORY=`pwd`/$CONFIG_RELATIVE_DIRECTORY
       elif linebeginswith "linux-shell=" $line; then
-        # Variable is used in the gnome function.
+        # Variable is used in the gnome_terminal function.
         CONFIG_LINUX_SHELL="${line##*=}"
       elif linebeginswith "auto-check-updates=" $line; then
         CONFIG_AUTO_CHECK_UPDATES="${line##*=}"
-      # else
-      #   # I think I need this continue if someone writes some random string because scripting won't just return nil if a condition is not met I think.
-      #   continue
+      elif linebeginswith "apple-tab-spawn-delay=" $line; then
+        CONFIG_APPLE_TAB_SPAWN_DELAY="${line##*=}"
+      else
+        echo "Invalid config line: ${line}"
+        cat /opt/meow/help.txt
+        TRAP_EXIT=false
+        exit 1
       fi
 
       continue
@@ -284,6 +340,11 @@ EOT
 
     if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = false ]; then
       apple_terminal $group || iterm_terminal $group || gnome_terminal $group &
+
+      if [ "$TERM_PROGRAM" = "Apple_Terminal" ] || [ "$TERM_PROGRAM" = "iTerm.app" ]; then
+        # This sleep is needed for the apple terminal. It gets confused when you run the osascript concurrently.
+        sleep $CONFIG_APPLE_TAB_SPAWN_DELAY
+      fi
     fi
 
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
@@ -314,6 +375,7 @@ else
   CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
   CONFIG_LINUX_SHELL=bash &&
   CONFIG_AUTO_CHECK_UPDATES=true &&
+  CONFIG_APPLE_TAB_SPAWN_DELAY=0.5 &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
   read_meow_txt_file &&
