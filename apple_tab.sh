@@ -42,7 +42,7 @@ while read apple_file_line_command; do
   elif [ "$APPLE_FILE_INDEX" = 1 ]; then
     APPLE_GROUP=$apple_file_line_command
   elif [ "$APPLE_FILE_INDEX" -gt 2 ]; then
-    if applelinebeginswith "cd" $apple_file_line_command; then
+    if applelinebeginswith "-cd" $apple_file_line_command; then
       # Do nothing here.
       echo $apple_file_line_command > /dev/null
     else
@@ -52,7 +52,7 @@ while read apple_file_line_command; do
 
   APPLE_FILE_INDEX=$((APPLE_FILE_INDEX + 1))
 done <<EOT
-  `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+  `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
 jobs -p >>$APPLE_RELATIVE_DIRECTORY/meow-pids-${APPLE_GROUP}.txt

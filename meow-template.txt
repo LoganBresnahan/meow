@@ -1,51 +1,52 @@
--c Hi I'm a comment. I can go anywhere on a single line.
+# Hi I'm a comment. I must start on my own line.
 
 --start-config
--c The config section. Displayed below are all of the config options set to their defaults.
+# The config section. Displayed below are all of the config options set to their defaults.
 
 writable-relative-directory=tmp
--c Configure which relative directory to your project the Meow pid files should be written to.
--c If this directory is empty after Meow delete's its pid files then it will delete the directory as well.
+# Configure which relative directory to your project the Meow pid files should be written to.
+# If this directory is empty after Meow delete's its pid files then it will delete the directory as well.
 
 
 auto-check-updates=true
--c When set to true, Meow will run a silent update check when Meow terminates. If an update is found, Meow will prompt you.
+# When set to true, Meow will run a silent update check when Meow terminates. If an update is found, Meow will prompt you.
 
 
 apple-tab-spawn-delay=0.5
--c Apple's osascript, as implemented, doesn't like running concurrently when multiple tabs are spawned in the background of the shell.
--c To solve this, a slight delay was added. If you find it too short or too long you can configure that here.
--c Keep in mind, making it too short will result in odd behavior.
--c Values are in seconds and the default value, 0.5, should be read as half a second.
+# Apple's osascript, as implemented, doesn't like running concurrently when multiple tabs are spawned in the background of the shell.
+# To solve this, a slight delay was added. If you find it too short or too long you can configure that here.
+# Keep in mind, making it too short will result in odd behavior.
+# Values are in seconds and the default value, 0.5, should be read as half a second.
 
 
 linux-shell=bash
--c If you're on Linux you should tell Meow what shell you are using.
+# If you're on Linux you should tell Meow what shell you are using.
 
 
--c If you're happy with the above default values. You can delete the entire config section if desired but not recommended.
+# If you're happy with the above default values. You can delete the entire config section if desired but not recommended.
 --end-config
 
 
 --start-commands
--c The commands section. Here is where you provide Meow the processes you would like it to start.
--c Don't use "|" pipes in your commands. Meow will break.
--c Meow spawns processes in the background using the regular old shell "&". If your process can't be set in the background then it won't work.
--c This first section of commands belong to the Boss tab. The tab you are operating in when you execute Meow.
+# The commands section. Here is where you provide Meow the processes you would like it to start.
+# Meow spawns processes in the background using the regular old shell "&". If your process can't be set in the background then it won't work.
+# This first section of commands belong to the Boss tab. The tab you are operating in when you execute Meow.
 
--c The process at the beginning will be put at the foreground of your tab.
+# The process at the beginning will be put at the foreground of your tab.
 sleep 1000
--c The processes after the first per tab runs in the background.
+# The processes after the first per tab runs in the background.
 sleep 2000
 
 --new-tab-expire
-cd $HOME/my_project_two
+
+# Use "-cd" to tell Meow to change the working directory for a new tab.
+-cd $HOME/my_project_two
 sleep 3000
 sleep 4000
 
 --new-tab-endure
 
-cd $HOME/my_project_three
+-cd $HOME/my_project_three
 sleep 5000
 sleep 6000
 

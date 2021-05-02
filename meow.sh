@@ -48,10 +48,10 @@ kill_started_processes() {
 
         SAVED_TAB_GROUP_LINE_INDEX=$((SAVED_TAB_GROUP_LINE_INDEX + 1))
       done <<EOT
-        `echo "$saved_tab_group" | sed -n 1'p' | tr '|' '\n'`
+        `echo "$saved_tab_group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
     done <<EOT
-      `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+      `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
 EOT
   fi
 
@@ -79,7 +79,7 @@ apple_terminal() {
           APPLE_SHOULD_EXIT="true"
         fi
       elif [ "$APPLE_COMMAND_INDEX" -gt 1 ]; then
-        if linebeginswith "cd" $apple_line_command; then
+        if linebeginswith "-cd" $apple_line_command; then
           APPLE_WORKING_DIRECTORY="${apple_line_command##*cd}"
           # Nothing else to do with this while loop so break.
           break
@@ -88,10 +88,10 @@ apple_terminal() {
 
       APPLE_COMMAND_INDEX=$((APPLE_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
-    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "System Events" to keystroke "t" using {command down}
@@ -120,7 +120,7 @@ iterm_terminal() {
           ITERM_SHOULD_EXIT="true"
         fi
       elif [ "$ITERM_COMMAND_INDEX" -gt 1 ]; then
-        if linebeginswith "cd" $iterm_line_command; then
+        if linebeginswith "-cd" $iterm_line_command; then
           ITERM_WORKING_DIRECTORY="${iterm_line_command##*cd}"
           # Nothing else to do with this while loop so break.
           break
@@ -129,10 +129,10 @@ iterm_terminal() {
 
       ITERM_COMMAND_INDEX=$((ITERM_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
-    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "iTerm"
@@ -164,7 +164,7 @@ gnome_terminal() {
           GNOME_SHOULD_EXIT="sh"
         fi
       elif [ "$GNOME_COMMAND_INDEX" -gt 1 ]; then
-        if linebeginswith "cd" $gnome_line_command; then
+        if linebeginswith "-cd" $gnome_line_command; then
           GNOME_WORKING_DIRECTORY="${gnome_line_command##*cd}"
           # Nothing else to do with this while loop so break.
           break
@@ -173,12 +173,13 @@ gnome_terminal() {
 
       GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
-    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}|${@}"
+    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
     GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
 
+    # SHOULD THIS ACT LIKE THE APPLE TERMINAL?
     gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
   else
     echo "No supported terminal found for spawning new tabs. The options include; Apple Terminal, iTerm2, and Gnome Terminal."
@@ -194,7 +195,7 @@ read_meow_txt_file() {
   GROUP_NUMBER=0
 
   while read -r line; do
-    if linebeginswith "-c" $line || [ -z "$line" ]; then
+    if linebeginswith "#" $line || [ -z "$line" ]; then
       # Ignore comments and empty lines.
       continue
     fi
@@ -240,23 +241,24 @@ read_meow_txt_file() {
         START_OF_COMMANDS=false
       elif [ "$FIRST_COMMAND" = true ]; then
         # This condition signifies we have reached the first command.
-        TAB_GROUPS="${GROUP_NUMBER}|expire|${line}"
+        TAB_GROUPS="${GROUP_NUMBER}<meow-c>expire<meow-c>${line}"
         FIRST_COMMAND=false
       elif linebeginswith "--new-tab" $line; then
         GROUP_NUMBER=$((GROUP_NUMBER + 1))
 
         if linebeginswith "--new-tab-endure" $line; then
-          TAB_GROUPS="${TAB_GROUPS};${GROUP_NUMBER}|endure"
+          TAB_GROUPS="${TAB_GROUPS}<meow-g>${GROUP_NUMBER}<meow-c>endure"
         else
-          TAB_GROUPS="${TAB_GROUPS};${GROUP_NUMBER}|expire"
+          TAB_GROUPS="${TAB_GROUPS}<meow-g>${GROUP_NUMBER}<meow-c>expire"
         fi
       else
-        TAB_GROUPS="${TAB_GROUPS}|${line}"
+        TAB_GROUPS="${TAB_GROUPS}<meow-c>${line}"
       fi
 
       continue
     fi
 
+  # Call this meow-config.txt
   done < meow.txt
 }
 
@@ -284,17 +286,17 @@ handle_command_line_args() {
               if [ "$NEW_TAB_GROUPS" = "" ]; then
                 NEW_TAB_GROUPS="${prepared_group}"
               else
-                NEW_TAB_GROUPS="${NEW_TAB_GROUPS};${prepared_group}"
+                NEW_TAB_GROUPS="${NEW_TAB_GROUPS}<meow-g>${prepared_group}"
               fi
             fi
           fi
 
           PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
         done <<EOT
-          `echo "$prepared_group" | sed -n 1'p' | tr '|' '\n'`
+          `echo "$prepared_group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
       done <<EOT
-        `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+        `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
 EOT
     done
 
@@ -330,7 +332,7 @@ eval_commands() {
 
       LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$group" | sed -n 1'p' | tr '|' '\n'`
+      `echo "$group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
     if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = true ]; then
@@ -344,13 +346,16 @@ EOT
       if [ "$TERM_PROGRAM" = "Apple_Terminal" ] || [ "$TERM_PROGRAM" = "iTerm.app" ]; then
         # This sleep is needed for the apple terminal. It gets confused when you run the osascript concurrently.
         sleep $CONFIG_APPLE_TAB_SPAWN_DELAY
+      elif [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
+        # This sleep keeps the tabs opening in the expected order.
+        sleep 0.1
       fi
     fi
 
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
 # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
   done <<EOT
-    `echo "$TAB_GROUPS" | sed -n 1'p' | tr ';' '\n'`
+    `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
 EOT
 
   # Tell the first command to come to the foreground.
@@ -363,8 +368,6 @@ EOT
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
   cat /opt/meow/help.txt
-elif [ "$1" = "clean" ]; then
-  kill_started_processes
 elif [ "$1" = "generate" ] || [ "$1" = "gen" ]; then
   sh /opt/meow/generate.sh `pwd`
 elif [ "$1" = "update" ]; then

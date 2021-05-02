@@ -42,7 +42,7 @@ while read gnome_file_line_command; do
   elif [ "$GNOME_FILE_INDEX" = 1 ]; then
     GNOME_GROUP=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" -gt 2 ]; then
-    if gnomelinebeginswith "cd" $gnome_file_line_command; then
+    if gnomelinebeginswith "-cd" $gnome_file_line_command; then
       # Do nothing here.
       echo $gnome_file_line_command > /dev/null
     else
@@ -52,7 +52,7 @@ while read gnome_file_line_command; do
 
   GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
 done <<EOT
-  `echo "$@" | sed -n 1'p' | tr '|' '\n'`
+  `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
 EOT
 
 jobs -p >>$GNOME_RELATIVE_DIRECTORY/meow-pids-${GNOME_GROUP}.txt
