@@ -3,9 +3,9 @@
 # Exits if an error occurs.
 set -e
 
-echo "Copying the meow.txt template to ${1}"
+echo "Copying the meow-config.txt template to ${1}"
 
-cp -i /opt/meow/meow-template.txt $1/meow.txt
+cp -i /opt/meow/meow-config-template.txt $1/meow-config.txt
 
 # Copyright 2021 Logan Bresnahan
 

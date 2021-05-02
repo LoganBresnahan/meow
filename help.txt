@@ -1,9 +1,9 @@
-- Display help.               Command: meow --help, -h
-- Generate a meow.txt         Command: meow generate, gen
+- Display help.                 Command: meow --help, -h
+- Generate a meow-config.txt    Command: meow generate, gen
   template file in your
   current working directory.
-- Update Meow.                Command: meow update
-- Uninstall Meow.             Command: meow uninstall
+- Update Meow.                  Command: meow update
+- Uninstall Meow.               Command: meow uninstall
 
 * README: https://github.com/LoganBresnahan/meow
 

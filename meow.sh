@@ -48,10 +48,10 @@ kill_started_processes() {
 
         SAVED_TAB_GROUP_LINE_INDEX=$((SAVED_TAB_GROUP_LINE_INDEX + 1))
       done <<EOT
-        `echo "$saved_tab_group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+        `echo "$saved_tab_group" | sed 's/<meow-c>/\n/g'`
 EOT
     done <<EOT
-      `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
+      `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
   fi
 
@@ -88,7 +88,7 @@ apple_terminal() {
 
       APPLE_COMMAND_INDEX=$((APPLE_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+      `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
     APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
@@ -129,7 +129,7 @@ iterm_terminal() {
 
       ITERM_COMMAND_INDEX=$((ITERM_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+      `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
     ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
@@ -173,7 +173,7 @@ gnome_terminal() {
 
       GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+      `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
     GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
@@ -188,7 +188,6 @@ EOT
 }
 
 read_meow_txt_file() {
-  # cat meow.txt | awk '{$1=$1};1'
   START_OF_CONFIG=false
   START_OF_COMMANDS=false
   FIRST_COMMAND=false
@@ -258,8 +257,7 @@ read_meow_txt_file() {
       continue
     fi
 
-  # Call this meow-config.txt
-  done < meow.txt
+  done < meow-config.txt
 }
 
 handle_command_line_args() {
@@ -293,10 +291,10 @@ handle_command_line_args() {
 
           PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
         done <<EOT
-          `echo "$prepared_group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+          `echo "$prepared_group" | sed 's/<meow-c>/\n/g'`
 EOT
       done <<EOT
-        `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
+        `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
     done
 
@@ -332,7 +330,7 @@ eval_commands() {
 
       LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
     done <<EOT
-      `echo "$group" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+      `echo "$group" | sed 's/<meow-c>/\n/g'`
 EOT
 
     if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = true ]; then
@@ -355,7 +353,7 @@ EOT
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
 # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
   done <<EOT
-    `echo "$TAB_GROUPS" | sed -n 1'p' | sed 's/<meow-g>/\n/g'`
+    `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
 
   # Tell the first command to come to the foreground.

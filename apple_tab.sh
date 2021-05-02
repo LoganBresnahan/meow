@@ -52,7 +52,7 @@ while read apple_file_line_command; do
 
   APPLE_FILE_INDEX=$((APPLE_FILE_INDEX + 1))
 done <<EOT
-  `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+  `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
 jobs -p >>$APPLE_RELATIVE_DIRECTORY/meow-pids-${APPLE_GROUP}.txt

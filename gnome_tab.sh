@@ -52,7 +52,7 @@ while read gnome_file_line_command; do
 
   GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
 done <<EOT
-  `echo "$@" | sed -n 1'p' | sed 's/<meow-c>/\n/g'`
+  `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
 jobs -p >>$GNOME_RELATIVE_DIRECTORY/meow-pids-${GNOME_GROUP}.txt
