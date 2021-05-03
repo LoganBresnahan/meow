@@ -36,7 +36,7 @@ sudo sh install.sh
 ```
 3. Add Meow to your shell's PATH in your shell's profile file.
 ```sh
-export PATH=\$PATH:/opt/meow/executable
+export PATH=$PATH:/opt/meow/executable
 ```
 
 4. Reload your shell's profile and check the install.
