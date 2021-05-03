@@ -61,11 +61,14 @@ Meow's `meow-config.txt` file is where you store all of the configuration and co
 # Hi I'm a comment. I must start at the beginning of a line.
 
 --start-config
+
 writable-relative-directory=tmp
 auto-check-updates=true
 apple-tab-spawn-delay=0.5
 linux-shell=bash
+
 --end-config
+
 
 --start-commands
 
