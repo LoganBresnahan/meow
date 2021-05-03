@@ -10,15 +10,16 @@ fi
 (cd /opt/meow/;
   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 
-  if [ "$CURRENT_BRANCH" = "test-update" ]; then
+  if [ "$CURRENT_BRANCH" = "stable" ]; then
+    git fetch origin stable &>/dev/null
     CURRENT_MEOW_VERSION=`git rev-parse HEAD`
-    LATEST_MEOW_VERSION=`git rev-parse origin/test-update`
+    LATEST_MEOW_VERSION=`git rev-parse origin/stable`
 
     if [ "$CURRENT_MEOW_VERSION" != "$LATEST_MEOW_VERSION" ]; then
       while true; do
         read -p "New version of Meow found. Do you want to update? Yy|Nn > " yes_or_no
         case $yes_or_no in
-          [Yy]* ) git fetch origin test-update && git reset --hard FETCH_HEAD && git clean -df && echo "Update complete." && break;;
+          [Yy]* ) git fetch origin stable && git reset --hard FETCH_HEAD && git clean -df && echo "Update complete." && break;;
           [Nn]* ) echo "Update cancelled." && break;;
           * ) echo "Yy|Nn";;
         esac
