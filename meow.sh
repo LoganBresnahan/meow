@@ -53,9 +53,9 @@ EOT
     done <<EOT
       `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
-  fi
 
-  rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
+    rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
+  fi
 
   if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
     sh /opt/meow/update.sh
