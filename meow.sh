@@ -99,7 +99,6 @@ EOT
       tell application "Terminal" to do script "sh /opt/meow/apple_tab.sh '${APPLE_ARGS}'" in front window
       tell application "Terminal" to do script "$APPLE_SHOULD_EXIT" in front window
 EOF
-  # https://stuartdotson.com/blog/how-to-programmatically-open-a-new-terminal-tab-or-window/
   else
     false
   fi
@@ -150,7 +149,6 @@ EOF
 
 # For Linux's Gnome Terminal.
 gnome_terminal() {
-  # Check if Gnome Terminal is in use.
   if [ ! -z "$GNOME_TERMINAL_SERVICE" ]; then
     GNOME_COMMAND_INDEX=0
     GNOME_SHOULD_EXIT=""
@@ -179,7 +177,6 @@ EOT
     GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
     GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
 
-    # SHOULD THIS ACT LIKE THE APPLE TERMINAL?
     gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
   else
     echo "No supported terminal found for spawning new tabs. The options include; Apple Terminal, iTerm2, and Gnome Terminal."
