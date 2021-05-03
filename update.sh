@@ -11,6 +11,7 @@ fi
   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 
   if [ "$CURRENT_BRANCH" = "stable" ]; then
+    git fetch origin stable &>/dev/null
     CURRENT_MEOW_VERSION=`git rev-parse HEAD`
     LATEST_MEOW_VERSION=`git rev-parse origin/stable`
 
