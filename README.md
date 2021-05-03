@@ -7,13 +7,13 @@ Meow's main features:
 3. Allow the user to give meow command line arguments to distinguish groups of processes that they would like to start.
 4. Manage the spawned processes and terminal tabs so that you can have dependent processes expire when the lead process or group terminates.
 
-Mentioned above, Meow should be Posix compliant so it should work on most Unix type systems. However, one of Meow's best features is the ability to spawn your processes in another terminal tab automatically. Supported terminal emulators for this fucntionality include,
+Mentioned above, Meow should be Posix compliant so it should work on most Unix type systems. However, one of Meow's best features is the ability to spawn your processes in another terminal tab automatically. Supported terminal emulators for this functionality include,
 
 - Apple Terminal
 - iTerm2
 - Gnome Terminal
 
-If you're having trouble with Meow check out the Common Gotcha section below or open an issue.
+If you're having trouble with Meow check out the Common Gotchas section below or open an issue.
 
 <br>
 
@@ -34,7 +34,7 @@ cd meow/
 ```sh
 sudo sh install.sh
 ```
-3. Add Meow to your shell's PATH in your shell's configuration file.
+3. Add Meow to your shell's PATH in your shell's profile file.
 ```sh
 export PATH=\$PATH:/opt/meow/executable
 ```
@@ -68,19 +68,25 @@ linux-shell=bash
 --end-config
 
 --start-commands
+
 bundle exec rails server
 yarn start:dev
+
 --new-tab-expire
+
 -cd $HOME/my_project_two
 bundle exec rails server -p 5000
 npx webpack serve
+
 --new-tab-endure
+
 redis-server
+
 --end-commands
 
 ```
 
-To execute the commands listed in the `meow-config.txt`, run the following from within the same directory:
+To execute Meow and run the commands listed in the `meow-config.txt`, just type:
 
 ```sh
 meow
