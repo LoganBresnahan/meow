@@ -1,11 +1,21 @@
 # Meow
-Meow is a small program created to help spawn multiple processes when developing. It is Bourne shell compliant and meant for Unix type systems. Meow was originally created to help with web development. Imagine the need to start a back-end, front-end, and cache server. Meow should make that easier.
+Meow is a small program created to help spawn and manage multiple foreground and background processes when developing. It should be Posix compliant and meant for Unix type systems. Meow was originally created to help with web development. Imagine the need to start a back-end, front-end, and cache server. Meow should make that easier.
+
+Meow's main features:
+1. Allow a single command to spawn and kill as many processes as desired.
+2. Allow the user to spawn groups of processes in multiple other terminal tabs automatically.
+3. Allow the user to give meow command line arguments to distinguish groups of processes that they would like to start.
+4. Manage the spawned processes and terminal tabs so that you can have dependent processes expire when the lead process or group terminates.
+
+Mentioned above, Meow should be Posix compliant so it should work on most Unix type systems. However, one of Meow's best features is the ability to spawn your processes in another terminal tab automatically. Supported terminal emulators for this fucntionality include,
+
+- Apple Terminal
+- iTerm2
+- Gnome Terminal
+
+If you're having trouble with Meow check out the Common Gotcha section below or open an issue.
 
 <br>
-
-### Need common gotcha section
-- won't work for repl's. (things waiting for input)
-- if your process exits for it's own reason and you have it set to expire it may look like it didn't work.
 
 ## Installation
 1. Clone the stable branch with the following command.
@@ -14,23 +24,106 @@ Meow is a small program created to help spawn multiple processes when developing
 git clone --single-branch --branch stable git@github.com:LoganBresnahan/meow.git
 ```
 
-2. As the root user execute the `install.sh` script.
-
+2. Change directories into the newly cloned repository. You must do this for the install script to execute correctly.
 ```sh
-sudo ./meow/install.sh
+cd meow/
 ```
 
-3. Check the install.
+3. As the root user execute the `install.sh` script.
 
 ```sh
+sudo sh install.sh
+```
+3. Add Meow to your shell's PATH in your shell's configuration file.
+```sh
+export PATH=\$PATH:/opt/meow/executable
+```
+
+4. Reload your shell's profile and check the install.
+
+```
 meow --help
 ```
 
-4. If the meow command is not executing try reseting your shell.
+5. If the install was successful you can remove the repository that was just cloned.
+
+<br>
+
+## Usage
+Inside of your desired directory you can use Meow's generate command to create a `meow-config.txt` file. This will copy the provided template and create the file at the root of your current directory. If you don't want the templated version you can create the file manually.
+```sh
+meow generate
+```
+
+Meow's `meow-config.txt` file is where you store all of the configuration and commands for Meow to run.
+
+```
+# Hi I'm a comment. I must start at the beginning of a line.
+
+--start-config
+writable-relative-directory=tmp
+auto-check-updates=true
+apple-tab-spawn-delay=0.5
+linux-shell=bash
+--end-config
+
+--start-commands
+bundle exec rails server
+yarn start:dev
+--new-tab-expire
+-cd $HOME/my_project_two
+bundle exec rails server -p 5000
+npx webpack serve
+--new-tab-endure
+redis-server
+--end-commands
+
+```
+
+To execute the commands listed in the `meow-config.txt`, run the following from within the same directory:
 
 ```sh
-meow --help
+meow
 ```
+
+In this example we are using Meow to start five processes in total and in three different terminal tabs. These three tabs are treated as three distinct groups to Meow. In the first tab, in which we are executing Meow, we start a Rails server and a webpack server using Yarn. The Rails server becomes the **boss process** for Meow. The boss process will always be the first process listed in the `meow-config.txt` file and is the process that exists in the foreground of your terminal tab. When the boss process dies all of the following processes in its group will die and tabs opened with the configuration of `--new-tab-expire` by Meow will have all of their processes die and the new tab will close as well.
+
+After the boss group, we have another group distinguished by `--new-tab-expire` and another after that distiguished with `--new-tab-endure`. Processes in the tab configured to "expire" will die with the boss process, and processes in the tab configured with "endure" will continue to live even after the boss process has been terminated. When you terminate the the tab set to endure it will manage cleaning up its processes. Likewise, for any tab set to expire, if you decide to terminate it early, it will manage cleaning up its processes as well. In the first new tab we see a `-cd` configuration. This tells Meow to change to the directory that you've provided. Note the use of `$HOME`, it's okay to use variables in the path but **DO NOT** use `~`. The tilda will not work. Finally, just like the boss group, the first command listed in your new tab will come to the foreground of your new tab and the rest will run in the background.
+
+For the configuration section, more detail can be found in the <a href=meow-config-template.txt>meow-config-template.txt</a>, but for a brief explanation:
+
+- `writable-relative-directory`: A directory for Meow to temporarily create Meow pid files.
+- `auto-check-updates`: If set to true Meow will silently check for updates.
+- `apple-tab-spawn-delay`: A short delay used for Apple users so that osascript doesn't get confused when tabs are spawned concurrently.
+- `linux-shell`: Used as a configuration option when creating new tabs using Gnome Terminal.
+
+
+### Command Line
+
+We showed that you can execute the Meow program from the command line with:
+
+```sh
+meow
+```
+
+You can also specify which groups from the `meow-config.txt` file you would like to start. The following example will only start the first group. In keeping with a programmers paradigm, everything starts at 0.
+
+```sh
+meow 0
+```
+
+Here is an example showing we can skip a group as well. The command below will start the first group and the third group listed in your `meow-config.txt` file.
+
+```sh
+meow 0 2
+```
+
+You can also start groups without the boss group.
+```sh
+meow 1 2
+```
+
+<br>
 
 ## Uninstall
 Execute the meow uninstall command.
@@ -39,92 +132,21 @@ Execute the meow uninstall command.
 meow uninstall
 ```
 
-## Usage
-Meow reads from a `meow-config.txt` file that you have created within a specified directory. The structure and ordering of the lines added to the `meow-config.txt` file are important. Here is an example file with an explanation following.
+<br>
 
-```
-bundle exec rails server
-redis-server
-
-cd ~/path/to/another/project
-npx webpack serve
-redis-server --port 4000
-```
-
-To have this `meow-config.txt` executed, run the following from within the same directory:
-
+## Update
+By default, Meow is configured to run a silent update check that will prompt you if there is an update available after Meow terminates. This is configurable and is explained more in the <a href=meow-config-template.txt>meow-config-template.txt</a> file. If you would like to check for an update manually, run the update command.
 ```sh
-meow
+meow update
 ```
-
-In the example we are using Meow to start three processes in total and in two different terminal tabs. In the first tab we start a Rails server and a Redis server. The Rails server becomes the **boss process** for Meow. The boss process will always be the first process listed in the `meow-config.txt` file and is the process that exists in the foreground of your terminal tab. When the boss process dies all of the following processes will die and tabs opened by Meow will close unless configured not to (explained in more examples below). After the Rails and Redis commands we find a newline. A newline in the `meow-config.txt` file tells Meow that the next set of commands after the newline need to be run in a new terminal tab. In our example, the first line after the newline is `cd ~/path/to/another/project` this is telling Meow to change the working directory in the new tab and then run the listed commands. The first command in the new tab becomes the mini-boss of it's group which exists in the foreground of its new tab. If you kill this process then the following processes in its group will die (unless specified).
 
 <br>
 
-Next are some examples showing how we can keep specified processes alive using the `meow-config.txt` file. Further down are command line examples.
+## Common Gotchas
 
-```
-bundle exec rails server
-redis-server
-
-meow-live
-cd ~/path/to/another/project
-npx webpack serve
-redis-server --port 4000
-```
-We've added `meow-live` to the top of the commands that run in a new tab. Now when the boss process, `bundle exec rails server` dies it won't kill anything in the 2nd tab.
-
-<br>
-
-Here is an even more detailed example for keeping individual processes alive.
-
-```
-bundle exec rails server
-meow-live redis-server
-
-meow-live
-cd ~/path/to/another/project
-npx webpack serve
-meow-live redis-server --port 4000
-```
-
-In this scenario, when the user kills the boss process the second process in its group, `redis-server` will live because we've added `meow-live` infront of the command. As in the example before, we have `meow-live` as the first line for the second group so we know the boss process won't kill them. We have also added a `meow-live` to the second command in the group which means that when the mini-boss, `npx webpack serve` is killed it won't kill `redis-server --port 4000`.
-
-## Command Line
-
-We showed that you can execute the Meow program from the command line with:
-
-```sh
-meow
-```
-
-You can also specify which groups from the `meow-config.txt` file you would like to start. The following example will only start the first group.
-
-```sh
-meow 1
-```
-
-You can also specify from the command line groups you would like to start that won't get killed by the boss process. Note that if you add `live` to the first group `1` it will be ignored.
-
-```sh
-meow 1 2live
-```
-
-Finally, if you execute say only the 2nd group and tell it to `live` it will keep the terminal tab open after you kill the mini-boss.
-
-```sh
-meow 2live
-```
-
-## Cleanup
-
-For each group listed in the `meow-config.txt` file we create a `meow-pids-N.txt` file. When boss and mini-boss processes are killed we read from the corresponding pid file and kill the listed processes which are denoted by their ID's. Sometimes when dealing with system processes we can get ourselves into trouble with ghost processes. If you're having issues when your commands execute, try running the cleanup process manually.
-
-```sh
-meow clean
-```
-
-This will go through all the `meow-pids-N.txt` files and attempt to kill the listed pids.
+- Meow utilizes GNU's `jobs`, `fg`, and `bg`. If your process can't be set to the background then it won't work with Meow.
+- If your process exits for it's own reason, not caused by Meow, and you have its group set to expire it may look like the terminal tab closed too early. Make sure your commands are ready to be executed on your system before executing meow.
+- Don't use a tilda `~` in the path when telling Meow to change directories for a new tab. It won't work.
 
 <br>
 <br>

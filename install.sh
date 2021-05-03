@@ -8,9 +8,9 @@ echo "Copying meow into /opt/meow"
 
 cp -a `pwd` /opt/meow
 
-echo "************************************************************************************************************************************************"
+echo "***IMPORTANT***"
 echo "Add 'export PATH=\$PATH:/opt/meow/executable' to your shell's profile then reload your shell and the installation will be complete."
-echo "************************************************************************************************************************************************"
+echo "If you have verified the installation you can remove the repository you have just cloned."
 
 # Copyright 2021 Logan Bresnahan
 

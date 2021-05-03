@@ -8,9 +8,8 @@ echo "Removing meow from /opt/meow"
 
 rm -rf /opt/meow
 
-echo "*******************************************************************************************************************************************************"
+echo "***IMPORTANT***"
 echo "Meow uninstall complete. You can remove 'export PATH=\$PATH:/opt/meow/executable' from your shell's profile if you added it during Meow's installation."
-echo "*******************************************************************************************************************************************************"
 
 # Copyright 2021 Logan Bresnahan
 
