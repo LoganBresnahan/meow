@@ -12,11 +12,11 @@ auto-check-updates=true
 # When set to true, Meow will run a silent update check when Meow terminates. If an update is found, Meow will prompt you.
 
 
-apple-tab-spawn-delay=0.5
+apple-tab-spawn-delay=0.75
 # Apple's osascript, as implemented, doesn't like running concurrently when multiple tabs are spawned in the background of the shell.
 # To solve this, a slight delay was added. If you find it too short or too long you can configure that here.
 # Keep in mind, making it too short will result in odd behavior.
-# Values are in seconds and the default value, 0.5, should be read as half a second.
+# Values are in seconds and the default value, 0.75, should be read as three quarters of a second.
 
 
 linux-shell=bash

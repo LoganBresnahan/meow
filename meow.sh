@@ -379,7 +379,7 @@ else
   CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
   CONFIG_LINUX_SHELL=bash &&
   CONFIG_AUTO_CHECK_UPDATES=true &&
-  CONFIG_APPLE_TAB_SPAWN_DELAY=0.5 &&
+  CONFIG_APPLE_TAB_SPAWN_DELAY=0.75 &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
   read_meow_txt_file &&
