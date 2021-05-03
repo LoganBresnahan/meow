@@ -323,8 +323,11 @@ eval_commands() {
       # All we need to do here is evaluate commands that occur after the "expire" argument for group 0.
       if [ "$CURRENT_GROUP_IS_BOSS_GROUP" = true ]; then
         if [ "$LINE_COMMAND_INDEX" -gt 1 ]; then
-          # check for cd command and echo you can't do that.
-          eval "${line_command} &"
+          if linebeginswith "-cd" $line_command; then
+            echo "*** Cannot change directories for the boss group."
+          else
+            eval "${line_command} &"
+          fi
         fi
       fi
 
