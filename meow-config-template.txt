@@ -30,7 +30,7 @@ linux-shell=bash
 --start-commands
 # The commands section. Here is where you provide Meow the processes you would like it to start.
 # Meow spawns processes in the background using the regular old shell "&". If your process can't be set in the background then it won't work.
-# This first section of commands belong to the Boss tab. The tab you are operating in when you execute Meow.
+# This first section of commands belong to the boss group. The tab you are operating in when you execute Meow.
 
 # The process at the beginning will be put at the foreground of your tab.
 sleep 1000
@@ -41,6 +41,8 @@ sleep 2000
 
 # Use "-cd" to tell Meow to change the working directory for a new tab.
 -cd $HOME/my_project_two
+
+# Like the boss group tab. The first command in your new tabs will be at the foreground.
 sleep 3000
 sleep 4000
 
