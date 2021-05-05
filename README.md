@@ -57,7 +57,37 @@ meow generate
 
 Meow's `meow-config.txt` file is where you store all of the configuration and commands for Meow to run.
 
-<script src="https://gist.github.com/LoganBresnahan/7ff705a09e6013bfe1d3763fb58a20e4.js"></script>
+```
+# Hi I'm a comment. I must start at the beginning of a line.
+
+--start-config
+
+writable-relative-directory=tmp
+auto-check-updates=true
+apple-tab-spawn-delay=0.75
+unix-shell=bash
+
+--end-config
+
+
+--start-commands
+
+bundle exec rails server
+yarn start:dev
+
+--new-tab-expire
+
+-cd $HOME/my_project_two
+mix run --no-halt
+npx webpack --mode=development --watch=true
+
+--new-tab-endure
+
+redis-server
+
+--end-commands
+
+```
 
 To execute Meow and run the commands listed in the `meow-config.txt`, just type:
 
@@ -71,10 +101,10 @@ After the boss group, we have another group distinguished by `--new-tab-expire` 
 
 ### Meow's Config Section for the meow-config.txt
 
-- `writable-relative-directory`: A directory for Meow to temporarily create Meow pid files.
-- `auto-check-updates`: If set to true Meow will silently check for updates.
-- `apple-tab-spawn-delay`: A short delay used for Apple users so that osascript doesn't get confused when tabs are spawned concurrently.
-- `linux-shell`: Used as a configuration option when creating new tabs using Gnome Terminal.
+- `writable-relative-directory`: Defaults to `tmp`. A relative directory for Meow to temporarily create Meow pid files. If the directory doesn't exist, Meow will create it for you. If the directory is empty after Meow terminates, Meow will delete the directory.
+- `auto-check-updates`: Defaults to `true`. If set to true Meow will silently check for updates.
+- `apple-tab-spawn-delay`: Defaults to `0.75`. A short delay in seconds for Apple users so that Apple's osascript doesn't get confused when tabs are spawned concurrently. 0.75 should be read as three quarters of a second. Keep in mind, if the value is too short, you may see odd behavior when spawning multiple tabs.
+- `unix-shell`: Defaults to `bash`. Your Unix shell. Used as an option when spawning your tabs in the Gnome Terminal emulator.
 
 
 ### Command Line
