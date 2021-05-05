@@ -57,37 +57,7 @@ meow generate
 
 Meow's `meow-config.txt` file is where you store all of the configuration and commands for Meow to run.
 
-```
-# Hi I'm a comment. I must start at the beginning of a line.
-
---start-config
-
-writable-relative-directory=tmp
-auto-check-updates=true
-apple-tab-spawn-delay=0.75
-linux-shell=bash
-
---end-config
-
-
---start-commands
-
-bundle exec rails server
-yarn start:dev
-
---new-tab-expire
-
--cd $HOME/my_project_two
-bundle exec rails server -p 5000
-npx webpack serve
-
---new-tab-endure
-
-redis-server
-
---end-commands
-
-```
+<script src="https://gist.github.com/LoganBresnahan/7ff705a09e6013bfe1d3763fb58a20e4.js"></script>
 
 To execute Meow and run the commands listed in the `meow-config.txt`, just type:
 
@@ -99,7 +69,7 @@ In this example we are using Meow to start five processes in total and in three 
 
 After the boss group, we have another group distinguished by `--new-tab-expire` and another after that distiguished with `--new-tab-endure`. Processes in the tab configured to "expire" will die with the boss process, and processes in the tab configured with "endure" will continue to live even after the boss process has been terminated. When you terminate the the tab set to endure it will manage cleaning up its processes. Likewise, for any tab set to expire, if you decide to terminate it early, it will manage cleaning up its processes as well. In the first new tab we see a `-cd` configuration. This tells Meow to change to the directory that you've provided. Note the use of `$HOME`, it's okay to use variables in the path but **DO NOT** use `~`. The tilda will not work. Finally, just like the boss group, the first command listed in your new tab will come to the foreground of your new tab and the rest will run in the background.
 
-For the configuration section, more detail can be found in the <a href=meow-config-template.txt>meow-config-template.txt</a>, but for a brief explanation:
+### Meow's Config Section for the meow-config.txt
 
 - `writable-relative-directory`: A directory for Meow to temporarily create Meow pid files.
 - `auto-check-updates`: If set to true Meow will silently check for updates.

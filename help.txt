@@ -1,4 +1,7 @@
-- Execute Meow                  Command: meow
+- Execute Meow.                 Command: meow
+- Execute Meow with command     Command: meow [0-9]
+  line arguments corresponding
+  to your group numbers.
 - Display help.                 Command: meow --help, -h
 - Generate a meow-config.txt    Command: meow generate, gen
   template file in your
