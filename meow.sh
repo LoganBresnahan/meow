@@ -55,10 +55,10 @@ EOT
 EOT
 
     rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
-  fi
 
-  if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
-    sh /opt/meow/update.sh
+    if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
+      sh /opt/meow/update.sh
+    fi
   fi
 }
 
