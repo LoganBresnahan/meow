@@ -9,4 +9,4 @@
 - Update Meow.                  Command: meow update
 - Uninstall Meow.               Command: meow uninstall
 
-* README: https://github.com/LoganBresnahan/meow#meow
+* README: https://github.com/LoganBresnahan/meow/tree/stable#meow

@@ -95,14 +95,14 @@ To execute Meow and run the commands listed in the `meow-config.txt`, just type:
 meow
 ```
 
-In this example we are using Meow to start five processes in total and in three different terminal tabs. These three tabs are treated as three distinct groups to Meow. In the first tab, in which we are executing Meow, we start a Rails server and a webpack server using Yarn. The Rails server becomes the **boss process** for Meow. The boss process will always be the first process listed in the `meow-config.txt` file and is the process that exists in the foreground of your terminal tab. When the boss process dies all of the following processes in its group will die and tabs opened with the configuration of `--new-tab-expire` by Meow will have all of their processes die and the new tab will close as well.
+In this example we are using Meow to start five processes in total and in three different terminal tabs. These three tabs are treated as three distinct groups to Meow. In the first tab, in which we are executing Meow, we start a Rails server and a webpack server using Yarn. The Rails server becomes the **boss process** for Meow. The boss process will always be the first process listed in the `meow-config.txt` file and is the process that exists in the foreground of your terminal tab. When the boss process dies all of the following processes in its group will die.
 
-After the boss group, we have another group distinguished by `--new-tab-expire` and another after that distiguished with `--new-tab-endure`. Processes in the tab configured to "expire" will die with the boss process, and processes in the tab configured with "endure" will continue to live even after the boss process has been terminated. When you terminate the the tab set to endure it will manage cleaning up its processes. Likewise, for any tab set to expire, if you decide to terminate it early, it will manage cleaning up its processes as well. In the first new tab we see a `-cd` configuration. This tells Meow to change to the directory that you've provided. Note the use of `$HOME`, it's okay to use variables in the path but **DO NOT** use `~`. The tilda will not work. Finally, just like the boss group, the first command listed in your new tab will come to the foreground of your new tab and the rest will run in the background.
+After the boss group, we have another group distinguished by `--new-tab-expire` and another after that distiguished with `--new-tab-endure`. Processes in the tab configured to "expire" will die with the boss process, and processes in the tab configured with "endure" will continue to live even after the boss process has been terminated. When you terminate the tab set to endure it will manage cleaning up its processes. Likewise, for any tab set to expire, if you decide to terminate it early, it will manage cleaning up its processes as well. In the first new tab we see a `-cd` configuration. This tells Meow to change to the directory that you've provided. Note the use of `$HOME`, it's okay to use variables in the path but **DO NOT** use `~`. The tilda will not work. Finally, just like the boss group, the first command listed in your new tab will come to the foreground of your new tab and the rest will run in the background.
 
 ### Meow's Config Section for the meow-config.txt
 
 - `writable-relative-directory`: Defaults to `tmp`. A relative directory for Meow to temporarily create Meow pid files. If the directory doesn't exist, Meow will create it for you. If the directory is empty after Meow terminates, Meow will delete the directory.
-- `auto-check-updates`: Defaults to `true`. If set to true Meow will silently check for updates.
+- `auto-check-updates`: Defaults to `true`. When set to true Meow will silently check for updates when Meow terminates.
 - `apple-tab-spawn-delay`: Defaults to `0.75`. A short delay in seconds for Apple users so that Apple's osascript doesn't get confused when tabs are spawned concurrently. 0.75 should be read as three quarters of a second. Keep in mind, if the value is too short, you may see odd behavior when spawning multiple tabs.
 - `unix-shell`: Defaults to `bash`. Your Unix shell. Used as an option when spawning your tabs in the Gnome Terminal emulator.
 
@@ -144,7 +144,8 @@ meow uninstall
 <br>
 
 ## Update
-By default, Meow is configured to run a silent update check that will prompt you if there is an update available after Meow terminates. This is configurable and is explained more in the <a href=meow-config-template.txt>meow-config-template.txt</a> file. If you would like to check for an update manually, run the update command.
+By default, Meow is configured to run a silent update check that will prompt you if there is an update available after Meow terminates. This is configurable in your `meow-config.txt` file. If you would like to check for an update manually, run the update command.
+
 ```sh
 meow update
 ```
