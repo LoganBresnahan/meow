@@ -189,8 +189,10 @@ read_meow_txt_file() {
   START_OF_COMMANDS=false
   FIRST_COMMAND=false
   GROUP_NUMBER=0
+  MEOW_CREATED_DIR=false
 
   if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
+    MEOW_CREATED_DIR=true
     mkdir $CONFIG_RELATIVE_DIRECTORY
   fi
 
@@ -212,6 +214,7 @@ read_meow_txt_file() {
       if linebeginswith "--end-config" $line; then
         START_OF_CONFIG=false
       elif linebeginswith "writable-relative-directory=" $line; then
+        ORIGINAL_RELATIVE_DIRECTORY=$CONFIG_RELATIVE_DIRECTORY
         CONFIG_RELATIVE_DIRECTORY="${line##*=}"
 
         if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
@@ -219,6 +222,10 @@ read_meow_txt_file() {
         fi
 
         CONFIG_RELATIVE_DIRECTORY=`pwd`/$CONFIG_RELATIVE_DIRECTORY
+
+        if [ "$ORIGINAL_RELATIVE_DIRECTORY" != "$CONFIG_RELATIVE_DIRECTORY" ] && [ "$MEOW_CREATED_DIR" = true ]; then
+          rmdir $ORIGINAL_RELATIVE_DIRECTORY &>/dev/null
+        fi
       elif linebeginswith "unix-shell=" $line; then
         # Variable is used in the gnome_terminal function.
         CONFIG_UNIX_SHELL="${line##*=}"
