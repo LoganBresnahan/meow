@@ -19,7 +19,7 @@ fi
       while true; do
         read -p "New version of Meow found. Do you want to update? Yy|Nn > " yes_or_no
         case $yes_or_no in
-          [Yy]* ) git fetch origin stable && git reset --hard FETCH_HEAD && git clean -df && echo "Update complete." && break;;
+          [Yy]* ) git fetch origin stable && git reset --hard FETCH_HEAD && git clean -df && echo "Update complete. See the latest release for potential breaking changes: https://github.com/LoganBresnahan/meow/releases" && break;;
           [Nn]* ) echo "Update cancelled." && break;;
           * ) echo "Yy|Nn";;
         esac

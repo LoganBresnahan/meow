@@ -1,54 +1,33 @@
 # Hi I'm a comment. I must start on my own line.
 
 --start-config
-# The config section. Displayed below are all of the config options set to their defaults.
 
+# These are all of the config options and their defaults. More can be found in the README: https://github.com/LoganBresnahan/meow/tree/stable#meow
 writable-relative-directory=tmp
-# Configure which relative directory to your project the Meow pid files should be written to.
-# If this directory is empty after Meow delete's its pid files then it will delete the directory as well.
-
-
 auto-check-updates=true
-# When set to true, Meow will run a silent update check when Meow terminates. If an update is found, Meow will prompt you.
-
-
 apple-tab-spawn-delay=0.75
-# Apple's osascript, as implemented, doesn't like running concurrently when multiple tabs are spawned in the background of the shell.
-# To solve this, a slight delay was added. If you find it too short or too long you can configure that here.
-# Keep in mind, making it too short will result in odd behavior.
-# Values are in seconds and the default value, 0.75, should be read as three quarters of a second.
+unix-shell=bash
 
-
-linux-shell=bash
-# If you're on Linux you should tell Meow what shell you are using.
-
-
-# If you're happy with the above default values. You can delete the entire config section if desired but not recommended.
 --end-config
 
 
 --start-commands
-# The commands section. Here is where you provide Meow the processes you would like it to start.
-# Meow spawns processes in the background using the regular old shell "&". If your process can't be set in the background then it won't work.
-# This first section of commands belong to the boss group. The tab you are operating in when you execute Meow.
 
-# The process at the beginning will be put at the foreground of your tab.
+# Group 0 (the boss group). The first command of a group will be at the foreground. You can have as many commands as you like.
 sleep 1000
-# The processes after the first per tab runs in the background.
 sleep 2000
 
 --new-tab-expire
 
+# Group 1. An "expire" tab will die when Group 0 dies.
 # Use "-cd" to tell Meow to change the working directory for a new tab.
 -cd $HOME/my_project_two
-
-# Like the boss group tab. The first command in your new tabs will be at the foreground.
 sleep 3000
 sleep 4000
 
 --new-tab-endure
 
--cd $HOME/my_project_three
+# Group 2. An "endure" tab will continue to live after Group 0 dies. You can have as many groups/tabs you like.
 sleep 5000
 sleep 6000
 

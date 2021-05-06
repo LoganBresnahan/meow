@@ -55,10 +55,10 @@ EOT
 EOT
 
     rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
-  fi
 
-  if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
-    sh /opt/meow/update.sh
+    if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
+      sh /opt/meow/update.sh
+    fi
   fi
 }
 
@@ -177,7 +177,7 @@ EOT
     GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
     GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
 
-    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_LINUX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_LINUX_SHELL"
+    gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_UNIX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_UNIX_SHELL"
   else
     echo "No supported terminal found for spawning new tabs. The options include; Apple Terminal, iTerm2, and Gnome Terminal."
     false
@@ -215,9 +215,9 @@ read_meow_txt_file() {
         fi
 
         CONFIG_RELATIVE_DIRECTORY=`pwd`/$CONFIG_RELATIVE_DIRECTORY
-      elif linebeginswith "linux-shell=" $line; then
+      elif linebeginswith "unix-shell=" $line; then
         # Variable is used in the gnome_terminal function.
-        CONFIG_LINUX_SHELL="${line##*=}"
+        CONFIG_UNIX_SHELL="${line##*=}"
       elif linebeginswith "auto-check-updates=" $line; then
         CONFIG_AUTO_CHECK_UPDATES="${line##*=}"
       elif linebeginswith "apple-tab-spawn-delay=" $line; then
@@ -374,7 +374,7 @@ elif [ "$1" = "uninstall" ]; then
   sudo sh /opt/meow/uninstall.sh
 else
   CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
-  CONFIG_LINUX_SHELL=bash &&
+  CONFIG_UNIX_SHELL=bash &&
   CONFIG_AUTO_CHECK_UPDATES=true &&
   CONFIG_APPLE_TAB_SPAWN_DELAY=0.75 &&
   TRAP_EXIT=true &&
