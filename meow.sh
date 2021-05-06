@@ -31,7 +31,7 @@ kill_started_processes() {
               # If the process is still alive then kill it.
               if ps -p $pid > /dev/null; then
                 echo "$KILL_LINE_NUMBER. Killing  Process: $pid"
-                kill $pid
+                kill -$CONFIG_KILL_SIGNAL $pid
               else
                 echo "$KILL_LINE_NUMBER. Process Already Dead: $pid"
               fi
@@ -91,7 +91,7 @@ apple_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
+    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "System Events" to keystroke "t" using {command down}
@@ -131,7 +131,7 @@ iterm_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
+    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "iTerm"
@@ -174,7 +174,7 @@ gnome_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${@}"
+    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
     GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
 
     gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_UNIX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_UNIX_SHELL"
@@ -222,6 +222,8 @@ read_meow_txt_file() {
         CONFIG_AUTO_CHECK_UPDATES="${line##*=}"
       elif linebeginswith "apple-tab-spawn-delay=" $line; then
         CONFIG_APPLE_TAB_SPAWN_DELAY="${line##*=}"
+      elif linebeginswith "kill-signal=" $line; then
+        CONFIG_KILL_SIGNAL="${line##*=}"
       else
         echo "Invalid config line: ${line}"
         cat /opt/meow/help.txt
@@ -377,6 +379,7 @@ else
   CONFIG_UNIX_SHELL=bash &&
   CONFIG_AUTO_CHECK_UPDATES=true &&
   CONFIG_APPLE_TAB_SPAWN_DELAY=0.75 &&
+  CONFIG_KILL_SIGNAL=15 &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
   read_meow_txt_file &&

@@ -15,7 +15,7 @@ gnome_trap() {
     # If the process is still alive then kill it.
     if ps -p $gnome_pid > /dev/null; then
       echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid"
-      kill $gnome_pid
+      kill -$GNOME_KILL_SIGNAL $gnome_pid
     else
       echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid"
     fi
@@ -35,13 +35,17 @@ trap gnome_trap EXIT
 GNOME_GROUP=0
 GNOME_FILE_INDEX=0
 GNOME_RELATIVE_DIRECTORY=""
+GNOME_KILL_SIGNAL=0
 
+# dir,kill-signal,group-#,endure/expire,commands...
 while read gnome_file_line_command; do
   if [ "$GNOME_FILE_INDEX" = 0 ]; then
     GNOME_RELATIVE_DIRECTORY=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" = 1 ]; then
+    GNOME_KILL_SIGNAL=$gnome_file_line_command
+  elif [ "$GNOME_FILE_INDEX" = 2 ]; then
     GNOME_GROUP=$gnome_file_line_command
-  elif [ "$GNOME_FILE_INDEX" -gt 2 ]; then
+  elif [ "$GNOME_FILE_INDEX" -gt 3 ]; then
     if gnomelinebeginswith "-cd" $gnome_file_line_command; then
       # Do nothing here.
       echo $gnome_file_line_command > /dev/null

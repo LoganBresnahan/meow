@@ -15,7 +15,7 @@ apple_trap() {
     # If the process is still alive then kill it.
     if ps -p $apple_pid > /dev/null; then
       echo "$APPLE_LINE_NUMBER. Killing  Process: $apple_pid"
-      kill $apple_pid
+      kill -$APPLE_KILL_SIGNAL $apple_pid
     else
       echo "$APPLE_LINE_NUMBER. Process Already Dead: $apple_pid"
     fi
@@ -35,13 +35,17 @@ trap apple_trap EXIT
 APPLE_GROUP=0
 APPLE_FILE_INDEX=0
 APPLE_RELATIVE_DIRECTORY=""
+APPLE_KILL_SIGNAL=0
 
+# dir,kill-signal,group-#,endure/expire,commands...
 while read apple_file_line_command; do
   if [ "$APPLE_FILE_INDEX" = 0 ]; then
     APPLE_RELATIVE_DIRECTORY=$apple_file_line_command
   elif [ "$APPLE_FILE_INDEX" = 1 ]; then
+    APPLE_KILL_SIGNAL=$apple_file_line_command
+  elif [ "$APPLE_FILE_INDEX" = 2 ]; then
     APPLE_GROUP=$apple_file_line_command
-  elif [ "$APPLE_FILE_INDEX" -gt 2 ]; then
+  elif [ "$APPLE_FILE_INDEX" -gt 3 ]; then
     if applelinebeginswith "-cd" $apple_file_line_command; then
       # Do nothing here.
       echo $apple_file_line_command > /dev/null

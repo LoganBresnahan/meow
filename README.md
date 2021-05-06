@@ -107,6 +107,7 @@ Below are all of Meow's configuration options. If you are happy with the default
 - `auto-check-updates`: Defaults to `true`. When set to true Meow will silently check for updates when Meow terminates.
 - `apple-tab-spawn-delay`: Defaults to `0.75`. A short delay in seconds for Apple users so that Apple's osascript doesn't get confused when tabs are spawned concurrently. 0.75 should be read as three quarters of a second. Keep in mind, if the value is too short, you may see odd behavior when spawning multiple tabs.
 - `unix-shell`: Defaults to `bash`. Your Unix shell. Used as an option when spawning your tabs in the Gnome Terminal emulator.
+- `kill-signal`: Defaults to `15`. The signal to send the `kill` command that will kill your processes. 15 is the code for SIGTERM, generally treated as the default kill command on most systems.
 
 
 ### Command Line
