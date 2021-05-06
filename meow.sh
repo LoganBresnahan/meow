@@ -190,6 +190,10 @@ read_meow_txt_file() {
   FIRST_COMMAND=false
   GROUP_NUMBER=0
 
+  if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
+    mkdir $CONFIG_RELATIVE_DIRECTORY
+  fi
+
   while read -r line; do
     if linebeginswith "#" $line || [ -z "$line" ]; then
       # Ignore comments and empty lines.
@@ -225,7 +229,8 @@ read_meow_txt_file() {
       elif linebeginswith "kill-signal=" $line; then
         CONFIG_KILL_SIGNAL="${line##*=}"
       else
-        echo "Invalid config line: ${line}"
+        echo "*** Invalid config line: ${line}"
+        echo ""
         cat /opt/meow/help.txt
         TRAP_EXIT=false
         exit 1
