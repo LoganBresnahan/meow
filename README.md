@@ -66,6 +66,7 @@ writable-relative-directory=tmp
 auto-check-updates=true
 apple-tab-spawn-delay=0.75
 unix-shell=bash
+kill-signal=15
 
 --end-config
 

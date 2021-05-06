@@ -2,7 +2,7 @@
 
 --start-config
 
-# These are all of the config options and their defaults. More can be found in the README: https://github.com/LoganBresnahan/meow/tree/stable#meow
+# These are all of the config options and their defaults. More can be found in the README: https://github.com/LoganBresnahan/meow/tree/stable#meows-config-section-for-the-meow-configtxt
 writable-relative-directory=tmp
 auto-check-updates=true
 apple-tab-spawn-delay=0.75
