@@ -3,14 +3,20 @@
 # Exits if an error occurs.
 set -e
 
-echo "Installing Meow."
-echo "Copying meow into /opt/meow"
+if [ ! -d /opt/meow ]; then
+  echo "Installing Meow."
+  echo "Copying meow into /opt/meow"
 
-cp -a `pwd` /opt/meow
+  cp -a `pwd` /opt/meow
 
-echo "***IMPORTANT***"
-echo "Add 'export PATH=\$PATH:/opt/meow/executable' to your shell's profile then reload your shell and the installation will be complete."
-echo "If you have verified the installation you can remove the repository you have just cloned."
+  echo "***IMPORTANT***"
+  echo "Add 'export PATH=\$PATH:/opt/meow/executable' to your shell's profile then reload your shell and the installation will be complete."
+  echo "If you have verified the installation you can remove the repository you have just cloned."
+else
+  echo "*** Meow already installed at /opt/meow"
+  echo "If you need to update, run: meow update"
+  echo "If you need to remove the old installation, run: meow uninstall"
+fi
 
 # Copyright 2021 Logan Bresnahan
 

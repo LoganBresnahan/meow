@@ -30,7 +30,7 @@ fi
       fi
     fi
   else
-    echo "Cannot check for an update. You are not on the stable branch. Navigate to /opt/meow and run 'git checkout stable'. You can then run 'meow update'."
+    echo "*** Cannot check for an update. You are not on the stable branch. Navigate to /opt/meow and run: git checkout stable && meow update"
   fi
 )
 
