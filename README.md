@@ -104,7 +104,7 @@ After the boss group, we have another group distinguished by `--new-tab-expire` 
 
 Below are all of Meow's configuration options. If you are happy with the defaults you can remove the config section from your `meow-config.txt` if desired.
 
-- `writable-relative-directory`: Defaults to `tmp`. A relative directory for Meow to temporarily create Meow pid files. If the directory doesn't exist, Meow will create it for you. If the directory is empty after Meow terminates, Meow will delete the directory.
+- `writable-relative-directory`: Defaults to `tmp`. A relative directory for Meow to temporarily create Meow pid files. If the directory doesn't exist, Meow will create it for you. If the directory was created by Meow and is empty after Meow terminates, Meow will delete the directory.
 - `auto-check-updates`: Defaults to `true`. When set to true, Meow will silently check for updates after Meow's boss group terminates.
 - `apple-tab-spawn-delay`: Defaults to `0.75`. A short delay in seconds for Apple users so that Apple's osascript doesn't get confused when tabs are spawned concurrently. 0.75 should be read as three quarters of a second. Keep in mind, if the value is too short, you may see odd behavior when spawning multiple tabs.
 - `unix-shell`: Defaults to `bash`. Your Unix shell. Used as an option when spawning your tabs in the Gnome Terminal emulator.

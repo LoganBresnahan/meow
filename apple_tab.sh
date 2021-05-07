@@ -25,7 +25,10 @@ apple_trap() {
 
   # Delete the meow-pids-N.txt file.
   rm $APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt &>/dev/null
-  rmdir $APPLE_RELATIVE_DIRECTORY &>/dev/null
+
+  if [ "$APPLE_MEOW_CREATED_DIR" = true ]; then
+    rmdir $APPLE_RELATIVE_DIRECTORY &>/dev/null
+  fi
 
   echo "Process cleanup done for meow-pids-${APPLE_GROUP}.txt" && exit
 }
@@ -36,16 +39,19 @@ APPLE_GROUP=0
 APPLE_FILE_INDEX=0
 APPLE_RELATIVE_DIRECTORY=""
 APPLE_KILL_SIGNAL=0
+APPLE_MEOW_CREATED_DIR=false
 
-# dir,kill-signal,group-#,endure/expire,commands...
+# dir,kill-signal,meow-create-dir,group-#,endure/expire,commands...
 while read apple_file_line_command; do
   if [ "$APPLE_FILE_INDEX" = 0 ]; then
     APPLE_RELATIVE_DIRECTORY=$apple_file_line_command
   elif [ "$APPLE_FILE_INDEX" = 1 ]; then
     APPLE_KILL_SIGNAL=$apple_file_line_command
   elif [ "$APPLE_FILE_INDEX" = 2 ]; then
+    APPLE_MEOW_CREATED_DIR=$apple_file_line_command
+  elif [ "$APPLE_FILE_INDEX" = 3 ]; then
     APPLE_GROUP=$apple_file_line_command
-  elif [ "$APPLE_FILE_INDEX" -gt 3 ]; then
+  elif [ "$APPLE_FILE_INDEX" -gt 4 ]; then
     if applelinebeginswith "-cd" $apple_file_line_command; then
       # Do nothing here.
       echo $apple_file_line_command > /dev/null

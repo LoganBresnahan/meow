@@ -54,7 +54,9 @@ EOT
       `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
 
-    rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
+    if [ "$MEOW_CREATED_DIR" = true ]; then
+      rmdir $CONFIG_RELATIVE_DIRECTORY &>/dev/null
+    fi
 
     if [ "$CONFIG_AUTO_CHECK_UPDATES" = true ]; then
       sh /opt/meow/update.sh
@@ -91,7 +93,7 @@ apple_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
+    APPLE_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${MEOW_CREATED_DIR}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "System Events" to keystroke "t" using {command down}
@@ -131,7 +133,7 @@ iterm_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
+    ITERM_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${MEOW_CREATED_DIR}<meow-c>${@}"
 
     osascript &>/dev/null <<EOF
       tell application "iTerm"
@@ -174,7 +176,7 @@ gnome_terminal() {
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
-    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${@}"
+    GNOME_ARGS="${CONFIG_RELATIVE_DIRECTORY}<meow-c>${CONFIG_KILL_SIGNAL}<meow-c>${MEOW_CREATED_DIR}<meow-c>${@}"
     GNOME_WORKING_DIRECTORY=`eval "echo $GNOME_WORKING_DIRECTORY"`
 
     gnome-terminal --tab --title $GNOME_WORKING_DIRECTORY --working-directory $GNOME_WORKING_DIRECTORY -- $CONFIG_UNIX_SHELL -ic "$GNOME_SHOULD_EXIT /opt/meow/gnome_tab.sh '${GNOME_ARGS}'; exec $CONFIG_UNIX_SHELL"
@@ -189,10 +191,11 @@ read_meow_txt_file() {
   START_OF_COMMANDS=false
   FIRST_COMMAND=false
   GROUP_NUMBER=0
-  MEOW_CREATED_DIR=false
+  MEOW_CREATED_DEFAULT_DIR=false
 
   if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
     MEOW_CREATED_DIR=true
+    MEOW_CREATED_DEFAULT_DIR=true
     mkdir $CONFIG_RELATIVE_DIRECTORY
   fi
 
@@ -218,12 +221,13 @@ read_meow_txt_file() {
         CONFIG_RELATIVE_DIRECTORY="${line##*=}"
 
         if [ ! -d "$CONFIG_RELATIVE_DIRECTORY" ]; then
+          MEOW_CREATED_DIR=true
           mkdir $CONFIG_RELATIVE_DIRECTORY
         fi
 
         CONFIG_RELATIVE_DIRECTORY=`pwd`/$CONFIG_RELATIVE_DIRECTORY
 
-        if [ "$ORIGINAL_RELATIVE_DIRECTORY" != "$CONFIG_RELATIVE_DIRECTORY" ] && [ "$MEOW_CREATED_DIR" = true ]; then
+        if [ "$ORIGINAL_RELATIVE_DIRECTORY" != "$CONFIG_RELATIVE_DIRECTORY" ] && [ "$MEOW_CREATED_DEFAULT_DIR" = true ]; then
           rmdir $ORIGINAL_RELATIVE_DIRECTORY &>/dev/null
         fi
       elif linebeginswith "unix-shell=" $line; then
@@ -392,6 +396,7 @@ else
   CONFIG_AUTO_CHECK_UPDATES=true &&
   CONFIG_APPLE_TAB_SPAWN_DELAY=0.75 &&
   CONFIG_KILL_SIGNAL=15 &&
+  MEOW_CREATED_DIR=false &&
   TRAP_EXIT=true &&
   TAB_GROUPS="" &&
   read_meow_txt_file &&

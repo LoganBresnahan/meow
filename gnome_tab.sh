@@ -25,7 +25,10 @@ gnome_trap() {
 
   # Delete the meow-pids-N.txt file.
   rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
-  rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
+
+  if [ "$GNOME_MEOW_CREATED_DIR" = true ]; then
+    rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
+  fi
 
   echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
 }
@@ -36,16 +39,19 @@ GNOME_GROUP=0
 GNOME_FILE_INDEX=0
 GNOME_RELATIVE_DIRECTORY=""
 GNOME_KILL_SIGNAL=0
+GNOME_MEOW_CREATED_DIR=false
 
-# dir,kill-signal,group-#,endure/expire,commands...
+# dir,kill-signal,meow-create-dir,group-#,endure/expire,commands...
 while read gnome_file_line_command; do
   if [ "$GNOME_FILE_INDEX" = 0 ]; then
     GNOME_RELATIVE_DIRECTORY=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" = 1 ]; then
     GNOME_KILL_SIGNAL=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" = 2 ]; then
+    GNOME_MEOW_CREATED_DIR=$gnome_file_line_command
+  elif [ "$GNOME_FILE_INDEX" = 3 ]; then
     GNOME_GROUP=$gnome_file_line_command
-  elif [ "$GNOME_FILE_INDEX" -gt 3 ]; then
+  elif [ "$GNOME_FILE_INDEX" -gt 4 ]; then
     if gnomelinebeginswith "-cd" $gnome_file_line_command; then
       # Do nothing here.
       echo $gnome_file_line_command > /dev/null
