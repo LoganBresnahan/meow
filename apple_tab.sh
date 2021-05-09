@@ -10,8 +10,6 @@ exec 9<> /dev/tty
 applelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
 apple_trap() {
-  # When the Boss process kills the expire new tab processes we get a race condition.
-  # It does not alter the functionality and error output is swallowed by /dev/null
   if [ -f "$APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt" ]; then
     APPLE_LINE_NUMBER=0
 
@@ -33,6 +31,7 @@ apple_trap() {
 
     echo "Process cleanup done for meow-pids-${APPLE_GROUP}.txt"
   fi
+
   # Close file descriptor 9.
   exec 9>&-
 }

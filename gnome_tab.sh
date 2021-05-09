@@ -10,27 +10,27 @@ exec 9<> /dev/tty
 gnomelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
 gnome_trap() {
-  # When the Boss process kills the expire new tab processes we get a race condition.
-  # It does not alter the functionality and error output is swallowed by /dev/null
-  GNOME_LINE_NUMBER=0
+  if [ -f "$GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt" ]; then
+    GNOME_LINE_NUMBER=0
 
-  while read -r gnome_pid; do
-    # If the process is still alive then kill it.
-    if ps -p $gnome_pid > /dev/null; then
-      echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid"
-      kill -$GNOME_KILL_SIGNAL $gnome_pid
-    else
-      echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid"
-    fi
+    while read -r gnome_pid; do
+      # If the process is still alive then kill it.
+      if ps -p $gnome_pid > /dev/null; then
+        echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid"
+        kill -$GNOME_KILL_SIGNAL $gnome_pid
+      else
+        echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid"
+      fi
 
-    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
-  done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+      GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
+    done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
-  # Delete the meow-pids-N.txt file.
-  rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
-  rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
+    # Delete the meow-pids-N.txt file.
+    rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+    rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
 
-  echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+    echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+  fi
 
   # Close file descriptor 9.
   exec 9>&-
