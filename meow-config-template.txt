@@ -21,7 +21,7 @@ sleep 2000
 --new-tab-expire
 
 # Group 1. An "expire" tab will close and its processes will die when Group 0 dies.
-# Use "-cd" to tell Meow to change the working directory for a new tab.
+# Use "-cd" to tell Meow to change the working directory for a new tab. Do not use a "~" in the path. It will not work.
 -cd $HOME/my_project_two
 sleep 3000
 sleep 4000

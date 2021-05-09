@@ -1,33 +1,39 @@
-# #!/bin/sh
+#!/bin/sh
 
 # Enable jobs control.
 set -m
+
+# Open file descriptor 9 read and write.
+exec 9<> /dev/tty
 
 # https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
 gnomelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 
 gnome_trap() {
-  # When the Boss process kills the expire new tab processes we get a race condition.
-  # It does not alter the functionality and error output is swallowed by /dev/null
-  GNOME_LINE_NUMBER=0
+  if [ -f "$GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt" ]; then
+    GNOME_LINE_NUMBER=0
 
-  while read -r gnome_pid; do
-    # If the process is still alive then kill it.
-    if ps -p $gnome_pid > /dev/null; then
-      echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid"
-      kill -$GNOME_KILL_SIGNAL $gnome_pid
-    else
-      echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid"
-    fi
+    while read -r gnome_pid; do
+      # If the process is still alive then kill it.
+      if ps -p $gnome_pid > /dev/null; then
+        echo "$GNOME_LINE_NUMBER. Killing  Process: $gnome_pid"
+        kill -$GNOME_KILL_SIGNAL $gnome_pid
+      else
+        echo "$GNOME_LINE_NUMBER. Process Already Dead: $gnome_pid"
+      fi
 
-    GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
-  done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+      GNOME_LINE_NUMBER=$((GNOME_LINE_NUMBER + 1))
+    done < $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
 
-  # Delete the meow-pids-N.txt file.
-  rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
-  rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
+    # Delete the meow-pids-N.txt file.
+    rm $GNOME_RELATIVE_DIRECTORY/meow-pids-$GNOME_GROUP.txt
+    rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
 
-  echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+    echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+  fi
+
+  # Close file descriptor 9.
+  exec 9>&-
 }
 
 trap gnome_trap EXIT
@@ -38,7 +44,7 @@ GNOME_RELATIVE_DIRECTORY=""
 GNOME_KILL_SIGNAL=0
 
 # dir,kill-signal,group-#,endure/expire,commands...
-while read gnome_file_line_command; do
+while read gnome_file_line_command <&9; do
   if [ "$GNOME_FILE_INDEX" = 0 ]; then
     GNOME_RELATIVE_DIRECTORY=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" = 1 ]; then
@@ -55,7 +61,7 @@ while read gnome_file_line_command; do
   fi
 
   GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
-done <<EOT
+done 9<<EOT
   `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
