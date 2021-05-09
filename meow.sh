@@ -1,7 +1,10 @@
-# #!/bin/sh
+#!/bin/sh
 
 # Enable jobs control.
 set -m
+
+# Open file descriptor 9 read and write.
+exec 9<> /dev/tty
 
 # https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
 linebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
@@ -17,10 +20,10 @@ is_integer () {
 
 kill_started_processes() {
   if [ "$TRAP_EXIT" = true ]; then
-    while read saved_tab_group; do
+    while read saved_tab_group <&9; do
       SAVED_TAB_GROUP_LINE_INDEX=0
 
-      while read saved_tab_group_line; do
+      while read saved_tab_group_line <&9; do
         if [ "$SAVED_TAB_GROUP_LINE_INDEX" = 0 ]; then
           PREVIOUS_SAVED_TAB_GROUP_LINE=$saved_tab_group_line
         elif [ "$SAVED_TAB_GROUP_LINE_INDEX" = 1 ]; then
@@ -47,10 +50,10 @@ kill_started_processes() {
         fi
 
         SAVED_TAB_GROUP_LINE_INDEX=$((SAVED_TAB_GROUP_LINE_INDEX + 1))
-      done <<EOT
+      done 9<<EOT
         `echo "$saved_tab_group" | sed 's/<meow-c>/\n/g'`
 EOT
-    done <<EOT
+    done 9<<EOT
       `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
 
@@ -60,6 +63,9 @@ EOT
       sh /opt/meow/update.sh
     fi
   fi
+
+  # Close file descriptor 9.
+  exec 9>&-
 }
 
 trap kill_started_processes EXIT
@@ -71,7 +77,7 @@ apple_terminal() {
     APPLE_SHOULD_EXIT=""
     APPLE_WORKING_DIRECTORY=`pwd`
 
-    while read apple_line_command; do
+    while read apple_line_command <&9; do
       if [ "$APPLE_COMMAND_INDEX" = 1 ]; then
         if [ "$apple_line_command" = "expire" ]; then
           APPLE_SHOULD_EXIT="exit"
@@ -87,7 +93,7 @@ apple_terminal() {
       fi
 
       APPLE_COMMAND_INDEX=$((APPLE_COMMAND_INDEX + 1))
-    done <<EOT
+    done 9<<EOT
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
@@ -111,7 +117,7 @@ iterm_terminal() {
     ITERM_SHOULD_EXIT=""
     ITERM_WORKING_DIRECTORY=`pwd`
 
-    while read iterm_line_command; do
+    while read iterm_line_command <&9; do
       if [ "$ITERM_COMMAND_INDEX" = 1 ]; then
         if [ "$iterm_line_command" = "expire" ]; then
           ITERM_SHOULD_EXIT="exit"
@@ -127,7 +133,7 @@ iterm_terminal() {
       fi
 
       ITERM_COMMAND_INDEX=$((ITERM_COMMAND_INDEX + 1))
-    done <<EOT
+    done 9<<EOT
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
@@ -154,7 +160,7 @@ gnome_terminal() {
     GNOME_SHOULD_EXIT=""
     GNOME_WORKING_DIRECTORY=`pwd`
 
-    while read gnome_line_command; do
+    while read gnome_line_command <&9; do
       if [ "$GNOME_COMMAND_INDEX" = 1 ]; then
         if [ "$gnome_line_command" = "expire" ]; then
           GNOME_SHOULD_EXIT="exec"
@@ -170,7 +176,7 @@ gnome_terminal() {
       fi
 
       GNOME_COMMAND_INDEX=$((GNOME_COMMAND_INDEX + 1))
-    done <<EOT
+    done 9<<EOT
       `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
@@ -285,10 +291,10 @@ handle_command_line_args() {
 
   if [ ! -z "$SORTED_ARGS" ]; then
     for command_line_arg in `eval echo $SORTED_ARGS`; do
-      while read prepared_group; do
+      while read prepared_group <&9; do
         PREPARED_GROUP_LINE_INDEX=0
 
-        while read prepared_group_line; do
+        while read prepared_group_line <&9; do
           # Index 0 represents the position of the original group number.
           if [ "$PREPARED_GROUP_LINE_INDEX" = 0 ]; then
             if [ "$prepared_group_line" = "$command_line_arg" ]; then
@@ -301,10 +307,10 @@ handle_command_line_args() {
           fi
 
           PREPARED_GROUP_LINE_INDEX=$((PREPARED_GROUP_LINE_INDEX + 1))
-        done <<EOT
+        done 9<<EOT
           `echo "$prepared_group" | sed 's/<meow-c>/\n/g'`
 EOT
-      done <<EOT
+      done 9<<EOT
         `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
     done
@@ -322,11 +328,12 @@ EOT
 eval_commands() {
   BOSS_GROUP_STARTED=false
 
-  while read group; do
+  # https://unix.stackexchange.com/questions/422557/a-while-loop-and-an-here-document-what-happens-when#answer-422560
+  while read group <&9; do
     LINE_COMMAND_INDEX=0
     CURRENT_GROUP_IS_BOSS_GROUP=false
 
-    while read line_command; do
+    while read line_command <&9; do
       if [ "$LINE_COMMAND_INDEX" = 0 ] && [ "$line_command" = 0 ]; then
         BOSS_GROUP_STARTED=true
         CURRENT_GROUP_IS_BOSS_GROUP=true
@@ -343,7 +350,7 @@ eval_commands() {
       fi
 
       LINE_COMMAND_INDEX=$((LINE_COMMAND_INDEX + 1))
-    done <<EOT
+    done 9<<EOT
       `echo "$group" | sed 's/<meow-c>/\n/g'`
 EOT
 
@@ -366,7 +373,7 @@ EOT
 
 # https://stackoverflow.com/questions/7718307/how-to-split-a-list-by-comma-not-space#answer-7718447
 # https://stackoverflow.com/questions/16854280/a-variable-modified-inside-a-while-loop-is-not-remembered#answer-16855194
-  done <<EOT
+  done 9<<EOT
     `echo "$TAB_GROUPS" | sed 's/<meow-g>/\n/g'`
 EOT
 

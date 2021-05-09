@@ -1,7 +1,10 @@
-# #!/bin/sh
+#!/bin/sh
 
 # Enable jobs control.
 set -m
+
+# Open file descriptor 9 read and write.
+exec 9<> /dev/tty
 
 # https://stackoverflow.com/questions/2172352/in-bash-how-can-i-check-if-a-string-begins-with-some-value#answer-18558871
 gnomelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
@@ -28,6 +31,9 @@ gnome_trap() {
   rmdir $GNOME_RELATIVE_DIRECTORY &>/dev/null
 
   echo "Process cleanup done for meow-pids-${GNOME_GROUP}.txt"
+
+  # Close file descriptor 9.
+  exec 9>&-
 }
 
 trap gnome_trap EXIT
@@ -38,7 +44,7 @@ GNOME_RELATIVE_DIRECTORY=""
 GNOME_KILL_SIGNAL=0
 
 # dir,kill-signal,group-#,endure/expire,commands...
-while read gnome_file_line_command; do
+while read gnome_file_line_command <&9; do
   if [ "$GNOME_FILE_INDEX" = 0 ]; then
     GNOME_RELATIVE_DIRECTORY=$gnome_file_line_command
   elif [ "$GNOME_FILE_INDEX" = 1 ]; then
@@ -55,7 +61,7 @@ while read gnome_file_line_command; do
   fi
 
   GNOME_FILE_INDEX=$((GNOME_FILE_INDEX + 1))
-done <<EOT
+done 9<<EOT
   `echo "$@" | sed 's/<meow-c>/\n/g'`
 EOT
 
