@@ -12,26 +12,27 @@ applelinebeginswith() { case $2 in "$1"*) true;; *) false;; esac; }
 apple_trap() {
   # When the Boss process kills the expire new tab processes we get a race condition.
   # It does not alter the functionality and error output is swallowed by /dev/null
-  APPLE_LINE_NUMBER=0
+  if [ -f "$APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt" ]; then
+    APPLE_LINE_NUMBER=0
 
-  while read -r apple_pid; do
-    # If the process is still alive then kill it.
-    if ps -p $apple_pid > /dev/null; then
-      echo "$APPLE_LINE_NUMBER. Killing  Process: $apple_pid"
-      kill -$APPLE_KILL_SIGNAL $apple_pid
-    else
-      echo "$APPLE_LINE_NUMBER. Process Already Dead: $apple_pid"
-    fi
+    while read -r apple_pid; do
+      # If the process is still alive then kill it.
+      if ps -p $apple_pid > /dev/null; then
+        echo "$APPLE_LINE_NUMBER. Killing  Process: $apple_pid"
+        kill -$APPLE_KILL_SIGNAL $apple_pid
+      else
+        echo "$APPLE_LINE_NUMBER. Process Already Dead: $apple_pid"
+      fi
 
-    APPLE_LINE_NUMBER=$((APPLE_LINE_NUMBER + 1))
-  done < $APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt
+      APPLE_LINE_NUMBER=$((APPLE_LINE_NUMBER + 1))
+    done < $APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt
 
-  # Delete the meow-pids-N.txt file.
-  rm $APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt &>/dev/null
-  rmdir $APPLE_RELATIVE_DIRECTORY &>/dev/null
+    # Delete the meow-pids-N.txt file.
+    rm $APPLE_RELATIVE_DIRECTORY/meow-pids-$APPLE_GROUP.txt &>/dev/null
+    rmdir $APPLE_RELATIVE_DIRECTORY &>/dev/null
 
-  echo "Process cleanup done for meow-pids-${APPLE_GROUP}.txt" && exit
-
+    echo "Process cleanup done for meow-pids-${APPLE_GROUP}.txt"
+  fi
   # Close file descriptor 9.
   exec 9>&-
 }
