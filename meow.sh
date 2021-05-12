@@ -393,6 +393,8 @@ elif [ "$1" = "update" ]; then
   sh /opt/meow/update.sh "user_initiated"
 elif [ "$1" = "uninstall" ]; then
   sudo sh /opt/meow/uninstall.sh
+elif [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
+  cat /opt/meow/version.txt
 else
   CONFIG_RELATIVE_DIRECTORY=`pwd`/tmp &&
   CONFIG_UNIX_SHELL=bash &&

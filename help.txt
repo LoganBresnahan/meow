@@ -1,12 +1,19 @@
-- Execute Meow.                 Command: meow
-- Execute Meow with command     Command: meow [0-9]
+- Execute Meow.                 => meow
+
+- Execute Meow with command     => meow [0-9]
   line arguments corresponding
   to your group numbers.
-- Display help.                 Command: meow --help, -h
-- Generate a meow-config.txt    Command: meow generate, gen
+
+- Display help.                 => meow --help, -h
+
+- Generate a meow-config.txt    => meow generate, gen
   template file in your
   current working directory.
-- Update Meow.                  Command: meow update
-- Uninstall Meow.               Command: meow uninstall
+
+- Update Meow.                  => meow update
+
+- Uninstall Meow.               => meow uninstall
+
+- Show your Meow version.       => meow --version, -v
 
 * README: https://github.com/LoganBresnahan/meow/tree/stable#meow
