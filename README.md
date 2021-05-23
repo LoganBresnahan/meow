@@ -161,7 +161,7 @@ meow update
 
 ## Common Gotchas
 
-- Meow utilizes GNU's `jobs`, `fg`, and `bg`. If your process can't be set to the background then it won't work with Meow.
+- Meow utilizes GNU's `jobs`, `fg`, and `bg`. Normally, if your process can't be set to the background then it won't work with Meow. However, your first command in a group is quickly set to the foreground which allows processes such as repl's, which listen to STDIN, to work with Meow. If your command normally can't be set in the background try keeping it as the first command in its respective group.
 - If your process exits for it's own reason, not caused by Meow, and you have its group set to expire it may look like the terminal tab closed too early. Make sure your commands are ready to be executed on your system before executing meow.
 - Don't use a tilda `~` in the path when telling Meow to change directories for a new tab. It won't work.
 - If you're using a Mac and your spawned tabs are not executing your commands correctly, try increasing the default `apple-tab-spawn-delay` option in the config section of your `meow-config.txt` file.
